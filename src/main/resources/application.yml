@@ -1,0 +1,79 @@
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
+    expiration-time: '3600000'
+spring:
+  mail:
+    host: smtp.gmail.com
+    username: ${SUPPORT_EMAIL}
+    port: '587'
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: 'true'
+          auth: 'true'
+    password: ${APP_PASSWORD}
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: MADDemo1
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            client-secret: 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
+            client-id: 56330466237-a6mhq0bt60d0d2r46ulhjpij6pbm42lv.apps.googleusercontent.com
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: 'true'
+  datasource:
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    url: ${SPRING_DATASOURCE_URL}
+
+
+#  spring.application.name=MADDemo1
+#
+#  spring.jpa.hibernate.ddl-auto=update
+#  spring.datasource.url=${SPRING_DATASOURCE_URL}
+#  spring.datasource.username=${SPRING_DATASOURCE_USERNAME}
+#  spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
+#  spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+#  spring.jpa.show-sql=true
+#
+#  # JWT secret key
+#  security.jwt.secret-key =${JWT_SECRET_KEY}
+#  security.jwt.expiration-time=60000
+#
+#  #Oauth2 Config
+#  spring.security.oauth2.client.registration.google.client-id=56330466237-a6mhq0bt60d0d2r46ulhjpij6pbm42lv.apps.googleusercontent.com
+#  spring.security.oauth2.client.registration.google.client-secret=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
+#  spring.security.oauth2.client.registration.google.scope=profile, email
+#  spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/login/oauth2/code/google
+#  spring.security.oauth2.client.provider.google.authorization-uri=https://accounts.google.com/o/oauth2/auth
+#  spring.security.oauth2.client.provider.google.token-uri=https://oauth2.googleapis.com/token
+#  spring.security.oauth2.client.provider.google.user-info-uri=https://www.googleapis.com/oauth2/v3/userinfo
+#
+#
+#
+#  # Mail properties
+#  spring.mail.host=smtp.gmail.com
+#  spring.mail.port=587
+#  spring.mail.username=${SUPPORT_EMAIL}
+#  spring.mail.password=${APP_PASSWORD}
+#  spring.mail.properties.mail.smtp.auth=true
+#  spring.mail.properties.mail.smtp.starttls.enable=true
+#
+#  spring.config.import=optional:file:.env[.properties]
+#
