@@ -10,6 +10,9 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Random;
+
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
@@ -33,6 +36,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     newUser.setEmail(email);
                     newUser.setUsername(email);
                     newUser.setFullname(name);
+                    newUser.setVerificationCode(generateVerificationCode());
+                    newUser.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+                    newUser.setEnabled(true);
                     return userRepository.save(newUser);
                 });
 
@@ -42,6 +48,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // Trả về token hoặc lưu token vào response, tùy vào yêu cầu của bạn
         return new CustomOAuth2User(oauth2User, user, token);
+    }
+
+    private String generateVerificationCode() {
+        Random random = new Random();
+        int code = random.nextInt(900000) + 100000;
+        return String.valueOf(code);
     }
 }
 

@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Chế độ không sử dụng session
                 )
-                .authenticationProvider(authenticationProvider)  // Cung cấp phương thức xác thực
+                .authenticationProvider(authenticationProvider)// Cung cấp phương thức xác thực
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)

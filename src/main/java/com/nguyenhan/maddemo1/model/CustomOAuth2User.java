@@ -40,5 +40,9 @@ public class CustomOAuth2User implements OAuth2User {
     public String getToken() {
         return token;
     }
+
+    public User getUser() {
+        return user;
+    }
 }
 
