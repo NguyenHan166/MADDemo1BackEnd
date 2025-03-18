@@ -4,6 +4,7 @@ package com.nguyenhan.maddemo1.service;
 import com.nguyenhan.maddemo1.dto.LoginUserDto;
 import com.nguyenhan.maddemo1.dto.RegisterUserDto;
 import com.nguyenhan.maddemo1.dto.VerifyUserDto;
+import com.nguyenhan.maddemo1.exception.UserAlreadyExistsException;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -36,6 +37,12 @@ public class AuthenticationService {
     }
 
     public User signup(RegisterUserDto input) {
+        Optional<User> findUser = userRepository.findByEmail(input.getEmail());
+
+        if (findUser.isPresent()) {
+            throw new UserAlreadyExistsException("User already exists with this Email");
+        }
+
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getFullname(), input.getMobilePhone());
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
