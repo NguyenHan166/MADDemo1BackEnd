@@ -35,7 +35,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     User newUser = new User();
                     newUser.setEmail(email);
                     newUser.setUsername(email);
-                    newUser.setFullname(name);
+                    newUser.setFullName(name);
                     newUser.setVerificationCode(generateVerificationCode());
                     newUser.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
                     newUser.setEnabled(true);

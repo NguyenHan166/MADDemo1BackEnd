@@ -4,6 +4,8 @@ package com.nguyenhan.maddemo1.service;
 import com.nguyenhan.maddemo1.dto.LoginUserDto;
 import com.nguyenhan.maddemo1.dto.RegisterUserDto;
 import com.nguyenhan.maddemo1.dto.VerifyUserDto;
+import com.nguyenhan.maddemo1.exception.AccountNotVerifiedException;
+import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.exception.UserAlreadyExistsException;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
@@ -43,6 +45,7 @@ public class AuthenticationService {
             throw new UserAlreadyExistsException("User already exists with this Email");
         }
 
+
         User user = new User(input.getUsername(), input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getFullname(), input.getMobilePhone());
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
@@ -51,13 +54,27 @@ public class AuthenticationService {
         return userRepository.save(user);
     }
 
+    public User signupWithGoogle(String email, String username, String mobilePhone) {
+
+        User newUser = new User();
+        newUser.setEmail(email);
+        newUser.setUsername(username);
+        newUser.setMobilePhone(mobilePhone);
+        newUser.setEnabled(true);
+
+        userRepository.save(newUser);
+
+        return newUser;
+    }
+
     public User authenticate(LoginUserDto input) {
         User user = userRepository.findByEmail(input.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", input.getEmail()));
 
         if (!user.isEnabled()) {
-            throw new RuntimeException("Account not verified. Please verify your account.");
+            throw new AccountNotVerifiedException("Account not verified. Please verify your account.");
         }
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),

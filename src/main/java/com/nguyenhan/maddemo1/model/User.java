@@ -23,7 +23,7 @@ public class User implements UserDetails {
     @Column(unique = true, nullable = false)
     private String email;
     @Column(nullable = true)
-    private String fullname;
+    private String fullName;
     @Column(nullable = false)
     private String password ="";
     @Column(nullable = true)
@@ -46,11 +46,11 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String username, String email, String password, String fullname, String mobilePhone) {
+    public User(String username, String email, String password, String fullName, String mobilePhone) {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.fullname = fullname;
+        this.fullName = fullName;
         this.mobilePhone = mobilePhone;
     }
 

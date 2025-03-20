@@ -8,7 +8,7 @@ public class UsersMapper {
         userDto.setUsername(user.getUsername());
         userDto.setEmail(user.getEmail());
         userDto.setAge(user.getAge());
-        userDto.setFullname(user.getFullname());
+        userDto.setFullName(user.getFullName());
         userDto.setGender(user.getGender());
         userDto.setMobilePhone(user.getMobilePhone());
         userDto.setDateOfBirth(user.getDateOfBirth());
@@ -19,7 +19,7 @@ public class UsersMapper {
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setAge(userDto.getAge());
-        user.setFullname(userDto.getFullname());
+        user.setFullName(userDto.getFullName());
         user.setGender(userDto.getGender());
         user.setMobilePhone(userDto.getMobilePhone());
         user.setDateOfBirth(userDto.getDateOfBirth());

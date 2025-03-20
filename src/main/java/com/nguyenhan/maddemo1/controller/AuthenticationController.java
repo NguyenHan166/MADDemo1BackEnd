@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.controller;
 
+import com.nguyenhan.maddemo1.constants.UsersConstants;
 import com.nguyenhan.maddemo1.dto.LoginUserDto;
 import com.nguyenhan.maddemo1.dto.RegisterUserDto;
 import com.nguyenhan.maddemo1.dto.VerifyUserDto;
@@ -31,7 +32,7 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public ResponseEntity<User> register(@Valid @RequestBody RegisterUserDto registerUserDto) {
         User registeredUser = authenticationService.signup(registerUserDto);
-        return ResponseEntity.ok(registeredUser);
+        return ResponseEntity.status(UsersConstants.STATUS_201).body(registeredUser);
     }
 
     @PostMapping("/login")
@@ -39,7 +40,7 @@ public class AuthenticationController {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-        return ResponseEntity.ok(loginResponse);
+        return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
     }
 
     @PostMapping("/verify")
@@ -61,8 +62,24 @@ public class AuthenticationController {
             authenticationService.resendVerificationCode(email);
             return ResponseEntity.ok("Verification code sent");
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage()); // sửa lại
         }
     }
 
+//    POST http://localhost:8080/auth/loginWithGoogle?
+//    email={{$random.alphanumeric(8)}}&
+//    username={{$random.alphanumeric(8)}}&
+//    mobilePhone={{$random.alphanumeric(8)}}
+    @PostMapping("/loginWithGoogle")
+    public ResponseEntity<LoginResponse> loginWithGoogle(@RequestParam
+                                                             @Email(message = "Email address should be a valid value")
+                                                             @NotEmpty(message = "Email not be empty!")
+                                                             String email, @RequestParam
+    @NotEmpty(message = "Username not be empty!")
+    String username,@RequestParam String mobilePhone) {
+        User authenticatedUser = authenticationService.signupWithGoogle(email, username, mobilePhone);
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+        return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
+    }
 }

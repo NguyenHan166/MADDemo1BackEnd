@@ -1,10 +1,12 @@
 package com.nguyenhan.maddemo1.exception;
 
+import com.nguyenhan.maddemo1.constants.UsersConstants;
 import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,14 +39,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleCustomerAlreadyExistsException(UserAlreadyExistsException exception,
-                                                                                 WebRequest webRequest){
+                                                                                 WebRequest webRequest) {
         ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
                 webRequest.getDescription(false),
-                HttpStatus.BAD_REQUEST,
+                UsersConstants.STATUS_409,
                 exception.getMessage(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponseDTO, UsersConstants.STATUS_409);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -52,11 +54,35 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                             WebRequest webRequest) {
         ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
                 webRequest.getDescription(false),
-                HttpStatus.NOT_FOUND,
+                UsersConstants.STATUS_404,
                 exception.getMessage(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponseDTO, UsersConstants.STATUS_404);
     }
 
+    @ExceptionHandler(AccountNotVerifiedException.class)
+    public ResponseEntity<ErrorResponseDto> handleAccountNotVerifiedException(AccountNotVerifiedException exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                UsersConstants.STATUS_403,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, UsersConstants.STATUS_403);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorResponseDto> handleBadCredentialsException(BadCredentialsException ex) {
+
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(
+                ex.getClass().getName(),
+                UsersConstants.STATUS_400,
+                "Password is incorrect. Please try again.",
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDto, UsersConstants.STATUS_400);
+    }
 }

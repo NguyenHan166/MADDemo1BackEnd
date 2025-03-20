@@ -47,12 +47,12 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Chế độ không sử dụng session
                 )
                 .authenticationProvider(authenticationProvider)// Cung cấp phương thức xác thực
-                .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
-                        .successHandler(new OAuth2LoginSuccessHandler())
-                )
+//                .oauth2Login(oauth2 -> oauth2
+//                        .userInfoEndpoint(userInfo -> userInfo
+//                                .userService(customOAuth2UserService)
+//                        )
+//                        .successHandler(new OAuth2LoginSuccessHandler())
+//                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);  // Thêm bộ lọc JWT trước bộ lọc xác thực mặc định
 
         return http.build();
