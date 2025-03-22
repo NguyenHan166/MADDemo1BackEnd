@@ -14,9 +14,9 @@ import java.time.LocalDateTime;
 @Data
 @Getter@Setter
 public class UserDto {
-    @NotEmpty(message = "Username not be empty")
-    @Size(min = 5, max = 30, message = "The length of the username name should be between 5 and 30")
-    private String username;
+//    @NotEmpty(message = "Username not be empty")
+//    @Size(min = 5, max = 30, message = "The length of the username name should be between 5 and 30")
+//    private String username;
 
     @Email(message = "Email address should be a valid value")
     @NotEmpty(message = "Email not be empty!")

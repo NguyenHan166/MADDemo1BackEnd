@@ -9,15 +9,15 @@ public class UsersConstants {
     }
 
 
-    public static final HttpStatus STATUS_200 = HttpStatus.OK;
-    public static final HttpStatus STATUS_201 = HttpStatus.CREATED;
-    public static final HttpStatus STATUS_400 = HttpStatus.BAD_REQUEST;
-    public static final HttpStatus STATUS_401 = HttpStatus.UNAUTHORIZED;
-    public static final HttpStatus STATUS_403 = HttpStatus.FORBIDDEN;
-    public static final HttpStatus STATUS_404 = HttpStatus.NOT_FOUND;
-    public static final HttpStatus STATUS_409 = HttpStatus.CONFLICT;
-    public static final HttpStatus STATUS_417 = HttpStatus.EXPECTATION_FAILED;
-    public static final HttpStatus STATUS_500 = HttpStatus.INTERNAL_SERVER_ERROR;
+    public static final int STATUS_200 = HttpStatus.OK.value();
+    public static final int STATUS_201 = HttpStatus.CREATED.value();
+    public static final int STATUS_400 = HttpStatus.BAD_REQUEST.value();
+    public static final int STATUS_401 = HttpStatus.UNAUTHORIZED.value();
+    public static final int STATUS_403 = HttpStatus.FORBIDDEN.value();
+    public static final int STATUS_404 = HttpStatus.NOT_FOUND.value();
+    public static final int STATUS_409 = HttpStatus.CONFLICT.value();
+    public static final int STATUS_417 = HttpStatus.EXPECTATION_FAILED.value();
+    public static final int STATUS_500 = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
     public static final String MESSAGE_200 = "Request processed successfully";
     public static final String MESSAGE_201 = "User created successfully";

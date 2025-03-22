@@ -18,8 +18,8 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(unique = true, nullable = false)
-    private String username;
+//    @Column(unique = true, nullable = false)
+//    private String username;
     @Column(unique = true, nullable = false)
     private String email;
     @Column(nullable = true)
@@ -46,13 +46,19 @@ public class User implements UserDetails {
     public User() {
     }
 
-    public User(String username, String email, String password, String fullName, String mobilePhone) {
-        this.username = username;
+    public User(String email, String password, String fullName, String mobilePhone) {
         this.email = email;
         this.password = password;
         this.fullName = fullName;
         this.mobilePhone = mobilePhone;
     }
+
+
+    @Override
+    public String getUsername() {
+        return this.email;
+    }
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

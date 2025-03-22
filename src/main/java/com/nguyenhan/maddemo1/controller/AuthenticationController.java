@@ -3,9 +3,11 @@ package com.nguyenhan.maddemo1.controller;
 import com.nguyenhan.maddemo1.constants.UsersConstants;
 import com.nguyenhan.maddemo1.dto.LoginUserDto;
 import com.nguyenhan.maddemo1.dto.RegisterUserDto;
+import com.nguyenhan.maddemo1.dto.UserDto;
 import com.nguyenhan.maddemo1.dto.VerifyUserDto;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.responses.LoginResponse;
+import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.AuthenticationService;
 import com.nguyenhan.maddemo1.service.JwtService;
 import jakarta.validation.Valid;
@@ -36,7 +38,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto){
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
@@ -44,20 +46,22 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyUserDto verifyUserDto) {
+    public ResponseEntity<ResponseDto> verifyUser(@Valid @RequestBody VerifyUserDto verifyUserDto) {
         try {
             authenticationService.verifyUser(verifyUserDto);
-            return ResponseEntity.ok("Account verified successfully");
+            ResponseDto responseDto = new ResponseDto(UsersConstants.STATUS_200, "Account verified successfully");
+            return ResponseEntity.status(UsersConstants.STATUS_200).body(responseDto);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            ResponseDto responseDto = new ResponseDto(UsersConstants.STATUS_400, "Account verified failed");
+            return ResponseEntity.status(UsersConstants.STATUS_400).body(responseDto);
         }
     }
 
     @PostMapping("/resend")
     public ResponseEntity<?> resendVerificationCode(@RequestParam
-                                                        @Email(message = "Email address should be a valid value")
-                                                        @NotEmpty(message = "Email not be empty!")
-                                                        String email) {
+                                                    @Email(message = "Email address should be a valid value")
+                                                    @NotEmpty(message = "Email not be empty!")
+                                                    String email) {
         try {
             authenticationService.resendVerificationCode(email);
             return ResponseEntity.ok("Verification code sent");
@@ -66,20 +70,44 @@ public class AuthenticationController {
         }
     }
 
-//    POST http://localhost:8080/auth/loginWithGoogle?
+    //    POST http://localhost:8080/auth/loginWithGoogle?
 //    email={{$random.alphanumeric(8)}}&
 //    username={{$random.alphanumeric(8)}}&
 //    mobilePhone={{$random.alphanumeric(8)}}
     @PostMapping("/loginWithGoogle")
     public ResponseEntity<LoginResponse> loginWithGoogle(@RequestParam
-                                                             @Email(message = "Email address should be a valid value")
-                                                             @NotEmpty(message = "Email not be empty!")
-                                                             String email, @RequestParam
-    @NotEmpty(message = "Username not be empty!")
-    String username,@RequestParam String mobilePhone) {
+                                                         @Email(message = "Email address should be a valid value")
+                                                         @NotEmpty(message = "Email not be empty!")
+                                                         String email, @RequestParam
+                                                         @NotEmpty(message = "Username not be empty!")
+                                                         String username, @RequestParam String mobilePhone) {
         User authenticatedUser = authenticationService.signupWithGoogle(email, username, mobilePhone);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
         return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
+    }
+
+    @PostMapping("/sendVerifyEmail") // for forgot password
+    public ResponseEntity<ResponseDto> sendVerifyEmail(@RequestParam
+                                                       @Email(message = "Email address should be a valid value")
+                                                       @NotEmpty(message = "Email not be empty!")
+                                                       String email) {
+        try {
+            authenticationService.sendVerificationCodeForgotPassword(email);
+            return ResponseEntity.status(UsersConstants.STATUS_200).body(new ResponseDto(UsersConstants.STATUS_200, "Verification code sent"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(UsersConstants.STATUS_400).body(new ResponseDto(UsersConstants.STATUS_400, e.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<UserDto> forgotPassword(@Valid @RequestBody VerifyUserDto verifyUserDto, @RequestParam String newPassword) {
+        try{
+            UserDto userDto = authenticationService.forgotPassword(verifyUserDto, newPassword);
+            return ResponseEntity.status(UsersConstants.STATUS_200).body(userDto);
+        }catch (RuntimeException e) {
+            return ResponseEntity.status(UsersConstants.STATUS_400)
+                    .build();
+        }
     }
 }

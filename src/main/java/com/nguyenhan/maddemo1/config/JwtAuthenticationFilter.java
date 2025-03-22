@@ -1,7 +1,13 @@
 package com.nguyenhan.maddemo1.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.nguyenhan.maddemo1.constants.UsersConstants;
+import com.nguyenhan.maddemo1.exception.TokenInvalidException;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,6 +26,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static java.rmi.server.LogStream.log;
@@ -59,21 +66,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = authHeader.substring(7);  // Extract token
-            final String username = jwtService.extractUsername(jwt);
-            Optional<User> user = userRepository.findByUsername(username);
+            final String userEmail = jwtService.extractUsername(jwt);
+            Optional<User> user = userRepository.findByEmail(userEmail);
 
-            if (username != null) {
+            log.atInfo().log(userEmail);
+
+            if (userEmail != null) {
                 // Nếu token hết hạn, trả về lỗi
                 if (jwtService.isTokenExpired(jwt)) {
-                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-                    response.getWriter().write("Token has expired");
+                    sendErrorResponse(response, "Token is expired");
                     return;
                 }
 
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
                 // Nếu chưa xác thực, xác thực lại token
-                if (authentication == null || !authentication.getName().equals(username)) {
+                if (authentication == null || !authentication.getName().equals(userEmail)) {
                     UserDetails userDetails = this.userDetailsService.loadUserByUsername(user.get().getEmail());
 
                     if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -86,8 +94,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     } else {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
-                        response.getWriter().write("Invalid token");
+                        sendErrorResponse(response, "Token invalid");
                         return;
                     }
                 }
@@ -95,9 +102,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);  // 401 Unauthorized
-            response.getWriter().write("Invalid token: " + exception.getMessage());
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+            sendErrorResponse(response, "Token invalid");
         }
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+        // Tạo ErrorResponseDto
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                "Request failed", // Mô tả yêu cầu, có thể lấy từ webRequest
+                UsersConstants.STATUS_401,
+                errorMessage,
+                LocalDateTime.now()
+        );
+
+        // Cấu hình phản hồi JSON
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());  // Đảm bảo JavaTimeModule được đăng ký
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);  // Tắt việc chuyển ngày thành timestamp
+
+        // Cấu hình phản hồi JSON
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Unauthorized
+        response.setContentType("application/json");
+
+        // Chuyển đối tượng thành JSON và viết vào response
+        response.getWriter().write(objectMapper.writeValueAsString(errorResponseDTO));
     }
 }

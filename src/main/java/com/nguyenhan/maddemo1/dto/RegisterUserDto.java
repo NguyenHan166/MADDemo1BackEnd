@@ -18,9 +18,9 @@ public class RegisterUserDto {
     @NotEmpty(message = "Password not be empty")
     private String password;
 
-    @NotEmpty(message = "Username not be empty")
-    @Size(min = 5, max = 30, message = "The length of the username name should be between 5 and 30")
-    private String username;
+//    @NotEmpty(message = "Username not be empty")
+//    @Size(min = 5, max = 30, message = "The length of the username name should be between 5 and 30")
+//    private String username;
 
     @NotEmpty(message = "Fullname not be empty")
     private String fullname;

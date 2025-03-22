@@ -5,7 +5,7 @@ import com.nguyenhan.maddemo1.model.User;
 
 public class UsersMapper {
     public static UserDto mapToUserDto(User user, UserDto userDto) {
-        userDto.setUsername(user.getUsername());
+//        userDto.setUsername(user.getUsername());
         userDto.setEmail(user.getEmail());
         userDto.setAge(user.getAge());
         userDto.setFullName(user.getFullName());
@@ -16,7 +16,7 @@ public class UsersMapper {
     }
 
     public static User mapToUser(UserDto userDto, User user) {
-        user.setUsername(userDto.getUsername());
+//        user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setAge(userDto.getAge());
         user.setFullName(userDto.getFullName());

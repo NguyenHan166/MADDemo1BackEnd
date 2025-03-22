@@ -46,7 +46,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(errorResponseDTO, UsersConstants.STATUS_409);
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(UsersConstants.STATUS_409));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(errorResponseDTO, UsersConstants.STATUS_404);
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(UsersConstants.STATUS_404));
     }
 
     @ExceptionHandler(AccountNotVerifiedException.class)
@@ -70,7 +70,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 LocalDateTime.now()
         );
 
-        return new ResponseEntity<>(errorResponseDTO, UsersConstants.STATUS_403);
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(UsersConstants.STATUS_403));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
@@ -83,6 +83,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 LocalDateTime.now()
         );
 
-        return new ResponseEntity<>(errorResponseDto, UsersConstants.STATUS_400);
+        return new ResponseEntity<>(errorResponseDto, HttpStatusCode.valueOf(UsersConstants.STATUS_400));
+    }
+
+    @ExceptionHandler(TokenInvalidException.class)
+    public ResponseEntity<ErrorResponseDto> handleTokenInvalidException(TokenInvalidException exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                UsersConstants.STATUS_401,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(UsersConstants.STATUS_401));
+    }
+
+    @ExceptionHandler(VerificationCodeInvalid.class)
+    public ResponseEntity<ErrorResponseDto> handleVerificationCodeInvalid(VerificationCodeInvalid exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                UsersConstants.STATUS_400,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(UsersConstants.STATUS_400));
     }
 }

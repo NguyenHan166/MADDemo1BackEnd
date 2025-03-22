@@ -34,10 +34,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .orElseGet(() -> {
                     User newUser = new User();
                     newUser.setEmail(email);
-                    newUser.setUsername(email);
+                    newUser.setFullName(email);
                     newUser.setFullName(name);
-                    newUser.setVerificationCode(generateVerificationCode());
-                    newUser.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
                     newUser.setEnabled(true);
                     return userRepository.save(newUser);
                 });

@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public class ResponseDto {
 
-    private HttpStatus statusCode;
+    private int statusCode;
     private String statusMsg;
 
 }
