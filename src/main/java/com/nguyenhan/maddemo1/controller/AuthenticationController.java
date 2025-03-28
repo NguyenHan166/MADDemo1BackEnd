@@ -37,8 +37,21 @@ public class AuthenticationController {
         return ResponseEntity.status(UsersConstants.STATUS_201).body(registeredUser);
     }
 
+//    @PostMapping("/login")
+//    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
+//        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+//        String jwtToken = jwtService.generateToken(authenticatedUser);
+//        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+//        return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
+//    }
+
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<LoginResponse> authenticate(@RequestParam
+                                                          @Email(message =  "Email address should be a valid value")
+                                                          String email, @RequestParam String password) {
+        LoginUserDto loginUserDto = new LoginUserDto();
+        loginUserDto.setEmail(email);
+        loginUserDto.setPassword(password);
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
@@ -101,7 +114,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<UserDto> forgotPassword(@Valid @RequestBody VerifyUserDto verifyUserDto, @RequestParam String newPassword) {
+    public ResponseEntity<UserDto> forgotPassword(@Valid @RequestBody VerifyUserDto verifyUserDto,@RequestParam String newPassword) {
         try{
             UserDto userDto = authenticationService.forgotPassword(verifyUserDto, newPassword);
             return ResponseEntity.status(UsersConstants.STATUS_200).body(userDto);

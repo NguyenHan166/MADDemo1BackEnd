@@ -41,6 +41,10 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: ${SPRING_DATASOURCE_USERNAME}
     url: ${SPRING_DATASOURCE_URL}
+  data:
+    jpa:
+      repositories:
+        enabled: true
 
 
 #  spring.application.name=MADDemo1

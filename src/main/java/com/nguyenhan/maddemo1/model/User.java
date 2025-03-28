@@ -41,8 +41,10 @@ public class User implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
     private boolean enabled;
 
-    //constructor for creating an unverified user
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Course> courses;
 
+    //constructor for creating an unverified user
     public User() {
     }
 

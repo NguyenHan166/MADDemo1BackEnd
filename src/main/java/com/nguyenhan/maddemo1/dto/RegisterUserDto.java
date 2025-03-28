@@ -23,7 +23,7 @@ public class RegisterUserDto {
 //    private String username;
 
     @NotEmpty(message = "Fullname not be empty")
-    private String fullname;
+    private String fullName;
 
     @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
     @NotEmpty(message = "Mobile Phone not be empty")

@@ -53,7 +53,7 @@ public class AuthenticationService {
         }
 
 
-        User user = new User(input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getFullname(), input.getMobilePhone());
+        User user = new User(input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getFullName(), input.getMobilePhone());
         user.setVerificationCode(generateVerificationCode());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
