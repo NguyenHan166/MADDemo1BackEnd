@@ -1,16 +1,21 @@
 package com.nguyenhan.maddemo1.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
+@Data
 @Table(name = "users")
 @Getter
 @Setter
@@ -41,8 +46,13 @@ public class User implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
     private boolean enabled;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Course> courses;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Course> courses = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<ScheduleLearning> scheduleLearnings = new ArrayList<>();
 
     //constructor for creating an unverified user
     public User() {

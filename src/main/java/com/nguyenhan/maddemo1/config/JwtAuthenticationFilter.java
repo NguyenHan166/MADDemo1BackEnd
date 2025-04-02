@@ -99,10 +99,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             }
-
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            sendErrorResponse(response, "Token invalid");
+            log.atInfo().log("debug jwt chain" + exception.getMessage());
+            sendErrorResponse(response, exception.getMessage());
         }
     }
 

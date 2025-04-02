@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.exception;
 
+import com.nguyenhan.maddemo1.constants.ResponseConstants;
 import com.nguyenhan.maddemo1.constants.UsersConstants;
 import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import org.springframework.http.HttpHeaders;
@@ -108,5 +109,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         );
 
         return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(UsersConstants.STATUS_400));
+    }
+
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponseDto> handleResourceAlreadyExistsException(ResourceAlreadyExistsException exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                ResponseConstants.STATUS_400,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(ResponseConstants.STATUS_400));
     }
 }

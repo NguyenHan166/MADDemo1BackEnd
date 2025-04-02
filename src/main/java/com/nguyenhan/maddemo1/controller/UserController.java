@@ -6,8 +6,10 @@ import com.nguyenhan.maddemo1.mapper.UsersMapper;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.UserService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,6 +19,7 @@ import java.util.List;
 
 @RequestMapping("/api/users")
 @RestController
+@Slf4j
 public class UserController {
     private final UserService userService;
     public UserController(UserService userService) {
@@ -24,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUser() {
+    public ResponseEntity<UserDto> getCurrentUserDto() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         UserDto  userDto = UsersMapper.mapToUserDto(currentUser, new UserDto());
@@ -33,8 +36,7 @@ public class UserController {
 
     @GetMapping("/checkUser")
     public ResponseEntity<User> authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+        User currentUser = userService.getAuthenticatedUser();
         return ResponseEntity.ok(currentUser);
     }
 

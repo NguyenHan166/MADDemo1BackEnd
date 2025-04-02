@@ -9,16 +9,11 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 
 @Configuration
 public class JacksonConfig {
-
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
-                .modulesToInstall(new JavaTimeModule())  // Đảm bảo rằng JavaTimeModule được cài đặt
-                .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .build();
-
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
         return objectMapper;
     }
-
-
 }
+

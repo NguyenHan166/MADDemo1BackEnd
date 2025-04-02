@@ -1,20 +1,22 @@
 package com.nguyenhan.maddemo1.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "courses")
-@Getter@Setter@NoArgsConstructor@AllArgsConstructor
+@Getter@Setter@NoArgsConstructor@AllArgsConstructor@ToString
 public class Course extends BaseEntity{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String name;
@@ -27,5 +29,10 @@ public class Course extends BaseEntity{
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "userID")
+    @JsonBackReference
     private User user;
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<ScheduleLearning> scheduleLearnings = new ArrayList<>();
 }

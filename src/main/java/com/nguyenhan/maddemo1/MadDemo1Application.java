@@ -6,11 +6,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
-@EnableJpaAuditing
+@EnableJpaAuditing(auditorAwareRef = "customAuditorAware")
 public class MadDemo1Application {
 
     public static void main(String[] args) {
-//        System.out.println(AlarmEnum.LICHHOC);
         SpringApplication.run(MadDemo1Application.class, args);
     }
 

@@ -6,6 +6,9 @@ import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.UsersMapper;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +28,26 @@ public class UserService {
         userRepository.findAll().forEach(users::add);
         return users;
     }
+
+    @Transactional
+    public User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof User) {
+            User currentUser = (User) authentication.getPrincipal();// Lấy User từ Authentication
+            return currentUser;
+        }
+        return null;
+    }
+
+    @Transactional
+    public UserDto getAuthenticatedUserDto() {
+        User user = getAuthenticatedUser();
+        if (user != null) {
+            return UsersMapper.mapToUserDto(user, new UserDto());
+        }
+        return null;
+    }
+
 
     // update user
     public boolean updateUser(UserDto userDto) {
