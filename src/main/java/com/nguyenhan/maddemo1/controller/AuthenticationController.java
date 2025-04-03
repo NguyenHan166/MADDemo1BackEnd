@@ -47,8 +47,8 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestParam
-                                                          @Email(message =  "Email address should be a valid value")
-                                                          String email, @RequestParam String password) {
+                                                      @Email(message = "Email address should be a valid value")
+                                                      String email, @RequestParam String password) {
         LoginUserDto loginUserDto = new LoginUserDto();
         loginUserDto.setEmail(email);
         loginUserDto.setPassword(password);
@@ -70,18 +70,18 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam
-                                                    @Email(message = "Email address should be a valid value")
-                                                    @NotEmpty(message = "Email not be empty!")
-                                                    String email) {
-        try {
-            authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code sent");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage()); // sửa lại
-        }
-    }
+//    @PostMapping("/resend")
+//    public ResponseEntity<?> resendVerificationCode(@RequestParam
+//                                                    @Email(message = "Email address should be a valid value")
+//                                                    @NotEmpty(message = "Email not be empty!")
+//                                                    String email) {
+//        try {
+//            authenticationService.resendVerificationCode(email);
+//            return ResponseEntity.ok("Verification code sent");
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.badRequest().body(e.getMessage()); // sửa lại
+//        }
+//    }
 
     //    POST http://localhost:8080/auth/loginWithGoogle?
 //    email={{$random.alphanumeric(8)}}&
@@ -100,25 +100,39 @@ public class AuthenticationController {
         return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
     }
 
-    @PostMapping("/sendVerifyEmail") // for forgot password
-    public ResponseEntity<ResponseDto> sendVerifyEmail(@RequestParam
-                                                       @Email(message = "Email address should be a valid value")
-                                                       @NotEmpty(message = "Email not be empty!")
-                                                       String email) {
+//    @PostMapping("/sendVerifyEmail") // for forgot password
+//    public ResponseEntity<ResponseDto> sendVerifyEmail(@RequestParam
+//                                                       @Email(message = "Email address should be a valid value")
+//                                                       @NotEmpty(message = "Email not be empty!")
+//                                                       String email) {
+//        try {
+//            authenticationService.sendVerificationCodeForgotPassword(email);
+//            return ResponseEntity.status(UsersConstants.STATUS_200).body(new ResponseDto(UsersConstants.STATUS_200, "Verification code sent"));
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(UsersConstants.STATUS_400).body(new ResponseDto(UsersConstants.STATUS_400, e.getMessage()));
+//        }
+//    }
+
+    @PostMapping("/sendEmail") // for forgot password
+    public ResponseEntity<Object> sendEmail(@RequestParam
+                                            @Email(message = "Email address should be a valid value")
+                                            @NotEmpty(message = "Email not be empty!")
+                                            String email,
+                                            @RequestParam String event) {
         try {
-            authenticationService.sendVerificationCodeForgotPassword(email);
-            return ResponseEntity.status(UsersConstants.STATUS_200).body(new ResponseDto(UsersConstants.STATUS_200, "Verification code sent"));
+            VerifyUserDto verifyUserDto = authenticationService.sendEmail(email, event);
+            return ResponseEntity.status(UsersConstants.STATUS_200).body(verifyUserDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(UsersConstants.STATUS_400).body(new ResponseDto(UsersConstants.STATUS_400, e.getMessage()));
         }
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<UserDto> forgotPassword(@Valid @RequestBody VerifyUserDto verifyUserDto,@RequestParam String newPassword) {
-        try{
+    public ResponseEntity<UserDto> forgotPassword(@Valid @RequestBody VerifyUserDto verifyUserDto, @RequestParam String newPassword) {
+        try {
             UserDto userDto = authenticationService.forgotPassword(verifyUserDto, newPassword);
             return ResponseEntity.status(UsersConstants.STATUS_200).body(userDto);
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.status(UsersConstants.STATUS_400)
                     .build();
         }

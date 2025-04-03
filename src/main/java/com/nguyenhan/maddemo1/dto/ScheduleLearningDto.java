@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Data
 @Getter@Setter@AllArgsConstructor@NoArgsConstructor
 public class ScheduleLearningDto {
+    private Long id;
     private String description;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;

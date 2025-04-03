@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@RestController()
+@RestController
 @RequestMapping("api/scheduleLearnings")
 public class ScheduleLearningController {
 
@@ -40,6 +40,17 @@ public class ScheduleLearningController {
                 }
         );
         return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<ScheduleLearningDto>> fetchAllScheduleLearningOfUSer(@PathVariable Long userId) {
+        List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
+        scheduleLearningService.findAllByUserID(userId).forEach(
+            scheduleLearning -> {
+                scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+            }
+        );
+        return  ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
     }
 
     @PostMapping("/create")

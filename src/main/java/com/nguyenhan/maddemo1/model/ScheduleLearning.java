@@ -21,13 +21,13 @@ public class ScheduleLearning extends BaseEntity{
     private String learningAddresses;
     private String state;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "userId")
     @JsonBackReference
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "courseId", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "courseId")
     @JsonBackReference
     private Course course;
 

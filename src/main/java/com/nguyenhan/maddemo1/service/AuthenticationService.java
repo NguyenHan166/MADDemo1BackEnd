@@ -54,10 +54,9 @@ public class AuthenticationService {
 
 
         User user = new User(input.getEmail(), passwordEncoder.encode(input.getPassword()), input.getFullName(), input.getMobilePhone());
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
-        user.setEnabled(false);
-        sendVerificationEmail(user);
+//        user.setVerificationCode(generateVerificationCode());
+//        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
+        user.setEnabled(true);
         return userRepository.save(user);
     }
 
@@ -112,21 +111,21 @@ public class AuthenticationService {
         }
     }
 
-    public void resendVerificationCode(String email) {
-        Optional<User> optionalUser = userRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.isEnabled()) {
-                throw new RuntimeException("Account is already verified");
-            }
-            user.setVerificationCode(generateVerificationCode());
-            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-            sendVerificationEmail(user);
-            userRepository.save(user);
-        } else {
-            throw new RuntimeException("User not found");
-        }
-    }
+//    public void resendVerificationCode(String email) {
+//        Optional<User> optionalUser = userRepository.findByEmail(email);
+//        if (optionalUser.isPresent()) {
+//            User user = optionalUser.get();
+//            if (user.isEnabled()) {
+//                throw new RuntimeException("Account is already verified");
+//            }
+//            user.setVerificationCode(generateVerificationCode());
+//            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+//            sendVerificationEmail(user);
+//            userRepository.save(user);
+//        } else {
+//            throw new RuntimeException("User not found");
+//        }
+//    }
 
     public void sendVerificationCodeForgotPassword(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
@@ -157,10 +156,28 @@ public class AuthenticationService {
         }
     }
 
+    public VerifyUserDto sendEmail(String email, String event) {
+        VerifyUserDto verifyUserDto = new VerifyUserDto();
+        String verifyCode = generateVerificationCode();
+        verifyUserDto.setEmail(email);
+        verifyUserDto.setVerificationCode(verifyCode);
+        if (event.equals("ChangePassword")){
+            User user = userRepository.findByEmail(email).orElseThrow(
+                    () -> new ResourceNotFoundException("User", "email", email)
+            );
+            user.setVerificationCode(verifyCode);
+            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+            sendVerificationEmailForgotPassword(user);
+        }else if (event.equals("VerifyUser")){
+            sendVerificationEmail(email,verifyCode);
+        }
 
-    private void sendVerificationEmail(User user) { //TODO: Update with company logo
+        return verifyUserDto;
+    }
+
+    private void sendVerificationEmail(String email ,String verifyCode) { //TODO: Update with company logo
         String subject = "Account Verification";
-        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
+        String verificationCode = "VERIFICATION CODE " + verifyCode;
         String htmlMessage = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
@@ -175,7 +192,7 @@ public class AuthenticationService {
                 + "</html>";
 
         try {
-            emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
+            emailService.sendVerificationEmail(email, subject, htmlMessage);
         } catch (MessagingException e) {
             // Handle email sending exception
             e.printStackTrace();

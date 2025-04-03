@@ -5,11 +5,13 @@ import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.CourseMapper;
 import com.nguyenhan.maddemo1.model.Course;
+import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,12 +47,16 @@ public class CourseService {
     }
 
     public Course createCourse(CourseDto courseDto) {
-        if (courseRepository.findByName(courseDto.getName()).isPresent()) {
-            throw new ResourceAlreadyExistsException("Course", "name", courseDto.getName());
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+        for (Course course : user.getCourses()) {
+            if (course.getName().equals(courseDto.getName())) {
+                throw new ResourceAlreadyExistsException("Course", "name", courseDto.getName());
+            }
         }
 
         Course course = new Course();
-        log.atInfo().log("Creating new course " + course.getCreatedBy());
+//        log.atInfo().log("Creating new course " + course.getCreatedBy());
         courseMapper.mapToCourse(courseDto, course);
         return courseRepository.save(course);
     }

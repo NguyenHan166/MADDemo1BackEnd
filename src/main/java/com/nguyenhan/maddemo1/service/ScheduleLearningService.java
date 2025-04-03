@@ -32,6 +32,10 @@ public class ScheduleLearningService {
         return scheduleLearningRepository.findAll();
     }
 
+    public List<ScheduleLearning> findAllByUserID(Long userID) {
+        return scheduleLearningRepository.findAllByUserId(userID);
+    }
+
     public ScheduleLearning fetchScheduleLearning(Long scheduleLearningID) {
         return scheduleLearningRepository.findById(scheduleLearningID).orElseThrow(
                 () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID" , scheduleLearningID.toString())

@@ -20,7 +20,6 @@ public class CourseDto {
     private String teacher;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
-    @NotEmpty(message = "Số buổi học không được bỏ trống")
     private int numberOfLesion;
     private String addressLearning;
     private Long userId;
