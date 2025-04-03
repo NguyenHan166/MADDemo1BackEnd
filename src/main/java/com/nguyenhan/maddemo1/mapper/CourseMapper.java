@@ -23,6 +23,7 @@ public class CourseMapper {
         User user = userRepository.findById(courseDto.getUserId()).orElseThrow(
                 () -> new ResourceNotFoundException("User", "userId", courseDto.getUserId().toString())
         );
+        course.setId(courseDto.getId());
         course.setName(courseDto.getName());
         course.setDescription(courseDto.getDescription());
         course.setTeacher(courseDto.getTeacher());
@@ -35,6 +36,7 @@ public class CourseMapper {
     }
 
     public CourseDto mapToCourseDto(Course course, CourseDto courseDto) {
+        courseDto.setId(course.getId());
         courseDto.setName(course.getName());
         courseDto.setDescription(course.getDescription());
         courseDto.setTeacher(course.getTeacher());

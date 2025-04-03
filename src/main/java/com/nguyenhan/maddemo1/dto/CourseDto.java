@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @Getter@Setter@AllArgsConstructor@NoArgsConstructor
 public class CourseDto {
+    private Long id;
     @NotEmpty(message = "Tên khóa học không thể bỏ trống")
     private String name;
     private String description;

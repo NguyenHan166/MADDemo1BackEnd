@@ -18,6 +18,7 @@ public class UserDto {
 //    @Size(min = 5, max = 30, message = "The length of the username name should be between 5 and 30")
 //    private String username;
 
+    private Long id;
     @Email(message = "Email address should be a valid value")
     @NotEmpty(message = "Email not be empty!")
     private String email;
