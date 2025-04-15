@@ -79,7 +79,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(
                 ex.getClass().getName(),
-                UsersConstants.STATUS_400,
+                UsersConstants.STATUS_401,
                 "Password is incorrect. Please try again.",
                 LocalDateTime.now()
         );
@@ -113,6 +113,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
     public ResponseEntity<ErrorResponseDto> handleResourceAlreadyExistsException(ResourceAlreadyExistsException exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                ResponseConstants.STATUS_400,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(ResponseConstants.STATUS_400));
+    }
+
+    @ExceptionHandler(PasswordIncorrectException.class)
+    public ResponseEntity<ErrorResponseDto> handlePasswordIncorrectException(PasswordIncorrectException exception, WebRequest webRequest) {
         ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
                 webRequest.getDescription(false),
                 ResponseConstants.STATUS_400,

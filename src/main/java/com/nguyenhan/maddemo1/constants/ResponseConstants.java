@@ -22,7 +22,7 @@ public class ResponseConstants {
     public static final String MESSAGE_401 = "Unauthorized: Authentication is required";
     public static final String MESSAGE_403 = "Forbidden: You do not have permission to access this resource";
     public static final String MESSAGE_404 = "Resource not found";
-    public static final String MESSAGE_409 = "Conflict: Resource already exists";
+    public static final String MESSAGE_409 = "Something is conflict, please contact dev team";
     public static final String MESSAGE_417_UPDATE = "Update operation failed. Please try again or contact the Dev team";
     public static final String MESSAGE_417_DELETE = "Delete operation failed. Please try again or contact the Dev team";
     public static final String MESSAGE_500 = "Internal Server Error: An error occurred. Please try again or contact the Dev team";

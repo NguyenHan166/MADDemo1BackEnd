@@ -18,6 +18,5 @@ public class ScheduleLearningDto {
     private String teacher;
     private String learningAddresses;
     private String state;
-    private Long userID;
     private Long courseID;
 }

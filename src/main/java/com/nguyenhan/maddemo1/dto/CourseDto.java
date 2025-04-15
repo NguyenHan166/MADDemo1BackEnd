@@ -1,14 +1,13 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.model.ScheduleLearning;
 import com.nguyenhan.maddemo1.model.User;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Getter@Setter@AllArgsConstructor@NoArgsConstructor
@@ -22,6 +21,8 @@ public class CourseDto {
     private LocalDateTime timeEnd;
     private int numberOfLesion;
     private String addressLearning;
-    private Long userId;
-
+    private String repeatTime;
+    private String state;
+//    private Long noteId;
+    private List<ScheduleLearningDto> scheduleLearningList;
 }

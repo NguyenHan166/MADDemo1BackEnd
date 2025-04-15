@@ -5,20 +5,25 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
-@Table(name = "schedule_leanings")
+@Table(name = "alarms")
 @Getter@Setter@AllArgsConstructor@NoArgsConstructor
-public class ScheduleLearning extends BaseEntity{
+public class Alarm extends BaseEntity{
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    private String description;
-    private LocalDateTime timeStart;
-    private LocalDateTime timeEnd;
-    private String teacher;
-    private String learningAddresses;
+    private String name;
+    private Long entityId;
+    private String category;
+    private String dateAlarm;
+    private LocalDateTime timeAlarm;
+    private String repeatDays;  // Lưu chuỗi các ngày lặp lại
+    private String mode;
+    private String music;
     private String state;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -26,9 +31,5 @@ public class ScheduleLearning extends BaseEntity{
     @JsonBackReference
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "courseID")
-    @JsonBackReference
-    private Course course;
 
 }

@@ -3,12 +3,19 @@ package com.nguyenhan.maddemo1.controller;
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
 import com.nguyenhan.maddemo1.mapper.ScheduleLearningMapper;
+import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.ScheduleLearning;
+import com.nguyenhan.maddemo1.model.User;
+import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
+import com.nguyenhan.maddemo1.service.CourseService;
 import com.nguyenhan.maddemo1.service.ScheduleLearningService;
+import com.nguyenhan.maddemo1.service.UserService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +24,15 @@ import java.util.List;
 public class ScheduleLearningController {
 
     private final ScheduleLearningService scheduleLearningService;
-    public final ScheduleLearningMapper scheduleLearningMapper;
+    private final ScheduleLearningMapper scheduleLearningMapper;
+    private final UserService userService;
+    private final CourseService courseService;
 
-    public ScheduleLearningController(ScheduleLearningService scheduleLearningService, ScheduleLearningMapper scheduleLearningMapper) {
+    public ScheduleLearningController(ScheduleLearningService scheduleLearningService, ScheduleLearningMapper scheduleLearningMapper, UserService userService, CourseService courseService) {
         this.scheduleLearningService = scheduleLearningService;
         this.scheduleLearningMapper = scheduleLearningMapper;
+        this.userService = userService;
+        this.courseService = courseService;
     }
 
     @GetMapping("/fetch")
@@ -32,20 +43,20 @@ public class ScheduleLearningController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<ScheduleLearningDto>> fetchAllScheduleLearning() {
-        List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
-        scheduleLearningService.findAll().forEach(
-                scheduleLearning -> {
-                    scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
-                }
-        );
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
-    }
+    public ResponseEntity<Object> fetchAllScheduleLearningOfUSer(@RequestParam Long userId) {
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<List<ScheduleLearningDto>> fetchAllScheduleLearningOfUSer(@PathVariable Long userId) {
+        User findUser = userService.getAuthenticatedUser();
+        if (!findUser.getId().equals(userId)) {
+            return ResponseEntity.status(ResponseConstants.STATUS_409).body(new ErrorResponseDto(
+                    "/api/scheduleLearnings/{userId}",
+                    ResponseConstants.STATUS_409,
+                    ResponseConstants.MESSAGE_409,
+                    LocalDateTime.now()
+            ));
+        }
+
         List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
-        scheduleLearningService.findAllByUserID(userId).forEach(
+        scheduleLearningService.findAllByUser().forEach(
             scheduleLearning -> {
                 scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
             }
@@ -69,4 +80,41 @@ public class ScheduleLearningController {
         }
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<Object> deleteScheduleLearning(@RequestParam Long id) {
+        boolean isSuccess = scheduleLearningService.deleteScheduleLearning(id);
+        if (isSuccess) {
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(new ResponseDto(ResponseConstants.STATUS_200, ResponseConstants.MESSAGE_200));
+        }else{
+            return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ResponseDto(ResponseConstants.STATUS_417, ResponseConstants.MESSAGE_417_DELETE));
+        }
+    }
+
+    @GetMapping("/course")
+    public ResponseEntity<Object> getSchedulesByCourse(@RequestParam Long courseId) {
+        Course course = courseService.findById(courseId); // Tìm khóa học theo ID
+        List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
+        scheduleLearningService.getSchedulesByCourse(course).forEach(
+                scheduleLearning -> {
+                    scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+                }
+        );
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
+    }
+
+    // API lấy danh sách các buổi học trong khoảng thời gian
+    @GetMapping("/time")
+    public ResponseEntity<Object> getSchedulesBetweenTimes(
+            @RequestParam("courseId") Long courseId,
+            @RequestParam("startTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam("endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+        Course course = courseService.findById(courseId);
+        List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
+        scheduleLearningService.getSchedulesBetweenTimes(course ,startTime, endTime).forEach(
+                scheduleLearning -> {
+                    scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+                }
+        );
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
+    }
 }

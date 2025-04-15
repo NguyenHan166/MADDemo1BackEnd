@@ -26,8 +26,10 @@ public class Course extends BaseEntity{
     private LocalDateTime timeEnd;
     private int numberOfLesion;
     private String addressLearning;
+    private String state="ongoing"; // ongoing, pending, finish
+    private String repeatTime;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")
     @JsonBackReference
     private User user;
@@ -35,4 +37,8 @@ public class Course extends BaseEntity{
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ScheduleLearning> scheduleLearnings = new ArrayList<>();
+
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Assignment> assignments = new ArrayList<>();
 }

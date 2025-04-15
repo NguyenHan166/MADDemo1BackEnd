@@ -54,6 +54,14 @@ public class User implements UserDetails {
     @JsonManagedReference
     private List<ScheduleLearning> scheduleLearnings = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Alarm> alarms = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Assignment> assignments = new ArrayList<>();
+
     //constructor for creating an unverified user
     public User() {
     }

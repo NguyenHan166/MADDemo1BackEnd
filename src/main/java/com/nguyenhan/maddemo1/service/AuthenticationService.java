@@ -5,16 +5,15 @@ import com.nguyenhan.maddemo1.dto.LoginUserDto;
 import com.nguyenhan.maddemo1.dto.RegisterUserDto;
 import com.nguyenhan.maddemo1.dto.UserDto;
 import com.nguyenhan.maddemo1.dto.VerifyUserDto;
-import com.nguyenhan.maddemo1.exception.AccountNotVerifiedException;
-import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
-import com.nguyenhan.maddemo1.exception.UserAlreadyExistsException;
-import com.nguyenhan.maddemo1.exception.VerificationCodeInvalid;
+import com.nguyenhan.maddemo1.exception.*;
 import com.nguyenhan.maddemo1.mapper.UsersMapper;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +61,10 @@ public class AuthenticationService {
 
     public User signupWithGoogle(String email, String username, String mobilePhone) {
 
+        if (userRepository.findByEmail(email).isPresent()) {
+            return userRepository.findByEmail(email).get();
+        }
+
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setFullName(username);
@@ -81,12 +84,14 @@ public class AuthenticationService {
             throw new AccountNotVerifiedException("Account not verified. Please verify your account.");
         }
 
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getEmail(),
                         input.getPassword()
                 )
         );
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         return user;
     }
@@ -111,34 +116,18 @@ public class AuthenticationService {
         }
     }
 
-//    public void resendVerificationCode(String email) {
-//        Optional<User> optionalUser = userRepository.findByEmail(email);
-//        if (optionalUser.isPresent()) {
-//            User user = optionalUser.get();
-//            if (user.isEnabled()) {
-//                throw new RuntimeException("Account is already verified");
-//            }
-//            user.setVerificationCode(generateVerificationCode());
-//            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-//            sendVerificationEmail(user);
-//            userRepository.save(user);
-//        } else {
-//            throw new RuntimeException("User not found");
+//    public void sendVerificationCodeForgotPassword(String email) {
+//        User user = userRepository.findByEmail(email).orElseThrow(
+//                () -> new ResourceNotFoundException("User", "email", email)
+//        );
+//        if (!user.isEnabled()) {
+//            throw new AccountNotVerifiedException("Account not verified. Please verify your account.");
 //        }
+//        user.setVerificationCode(generateVerificationCode());
+//        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+//        sendVerificationEmailForgotPassword(user);
+//        userRepository.save(user);
 //    }
-
-    public void sendVerificationCodeForgotPassword(String email) {
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "email", email)
-        );
-        if (!user.isEnabled()) {
-            throw new AccountNotVerifiedException("Account not verified. Please verify your account.");
-        }
-        user.setVerificationCode(generateVerificationCode());
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-        sendVerificationEmailForgotPassword(user);
-        userRepository.save(user);
-    }
 
     public UserDto forgotPassword(VerifyUserDto verifyUserDto, String newPassword) {
         User user = userRepository.findByEmail(verifyUserDto.getEmail()).orElseThrow(
@@ -149,10 +138,35 @@ public class AuthenticationService {
         }
         if (user.getVerificationCode().equals(verifyUserDto.getVerificationCode())) {
             user.setPassword(passwordEncoder.encode(newPassword));
+            user.setVerificationCode(null);
+            user.setVerificationCodeExpiresAt(null);
             User savedUser = userRepository.save(user);
             return UsersMapper.mapToUserDto(savedUser, new UserDto());
         } else {
             throw new VerificationCodeInvalid("Invalid verification code");
+        }
+    }
+
+    public UserDto changePassword(VerifyUserDto verifyUserDto,String oldPassword ,String newPassword) {
+        User user = userRepository.findByEmail(verifyUserDto.getEmail()).orElseThrow(
+                () -> new ResourceNotFoundException("User", "email", verifyUserDto.getEmail())
+        );
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new VerificationCodeInvalid("Verification code has expired");
+        }
+
+        if (user.getVerificationCode().equals(verifyUserDto.getVerificationCode())){
+            if (passwordEncoder.encode(oldPassword).equals(user.getPassword())){
+                throw new PasswordIncorrectException("Passwords do not match");
+            }
+
+            user.setPassword(passwordEncoder.encode(newPassword));
+            user.setVerificationCode(null);
+            user.setVerificationCodeExpiresAt(null);
+            userRepository.save(user);
+            return UsersMapper.mapToUserDto(user, new UserDto());
+        }else{
+            throw new VerificationCodeInvalid("Invalid verification Code");
         }
     }
 
@@ -161,15 +175,18 @@ public class AuthenticationService {
         String verifyCode = generateVerificationCode();
         verifyUserDto.setEmail(email);
         verifyUserDto.setVerificationCode(verifyCode);
-        if (event.equals("ChangePassword")){
-            User user = userRepository.findByEmail(email).orElseThrow(
-                    () -> new ResourceNotFoundException("User", "email", email)
-            );
-            user.setVerificationCode(verifyCode);
-            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new ResourceNotFoundException("User", "email", email)
+        );
+        user.setVerificationCode(verifyCode);
+        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+        userRepository.save(user);
+        if (event.equals("ForgotPassword")){
             sendVerificationEmailForgotPassword(user);
         }else if (event.equals("VerifyUser")){
             sendVerificationEmail(email,verifyCode);
+        }else if (event.equals("ChangePassword")){
+            sendVerificationEmailChangePassword(email,verifyCode);
         }
 
         return verifyUserDto;
@@ -177,6 +194,30 @@ public class AuthenticationService {
 
     private void sendVerificationEmail(String email ,String verifyCode) { //TODO: Update with company logo
         String subject = "Account Verification";
+        String verificationCode = "VERIFICATION CODE " + verifyCode;
+        String htmlMessage = "<html>"
+                + "<body style=\"font-family: Arial, sans-serif;\">"
+                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
+                + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
+                + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
+                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
+                + "<h3 style=\"color: #333;\">Verification Code:</h3>"
+                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
+                + "</div>"
+                + "</div>"
+                + "</body>"
+                + "</html>";
+
+        try {
+            emailService.sendVerificationEmail(email, subject, htmlMessage);
+        } catch (MessagingException e) {
+            // Handle email sending exception
+            e.printStackTrace();
+        }
+    }
+
+    private void sendVerificationEmailChangePassword(String email ,String verifyCode) { //TODO: Update with company logo
+        String subject = "Change Password";
         String verificationCode = "VERIFICATION CODE " + verifyCode;
         String htmlMessage = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"

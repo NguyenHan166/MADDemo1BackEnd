@@ -6,6 +6,9 @@ import com.nguyenhan.maddemo1.mapper.UsersMapper;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -26,26 +29,47 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    @Operation(summary = "Lấy thông tin người dùng hiện tại đã xác thực")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lấy thông tin người dùng thành công"),
+            @ApiResponse(responseCode = "401", description = "Chưa xác thực")
+    })
     @GetMapping("/me")
-    public ResponseEntity<UserDto> getCurrentUserDto() {
+    public ResponseEntity<Object> getCurrentUserDto() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
         UserDto  userDto = UsersMapper.mapToUserDto(currentUser, new UserDto());
         return ResponseEntity.ok(userDto);
     }
 
+    @Operation(summary = "Lấy thông tin người dùng đã xác thực")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lấy người dùng thành công"),
+            @ApiResponse(responseCode = "401", description = "Chưa xác thực")
+    })
     @GetMapping("/checkUser")
     public ResponseEntity<User> authenticatedUser() {
         User currentUser = userService.getAuthenticatedUser();
         return ResponseEntity.ok(currentUser);
     }
 
+    @Operation(summary = "Lấy tất cả người dùng")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lấy tất cả người dùng thành công"),
+            @ApiResponse(responseCode = "500", description = "Lỗi nội bộ")
+    })
     @GetMapping("/")
     public ResponseEntity<List<User>> allUsers() {
         List <User> users = userService.allUsers();
         return ResponseEntity.ok(users);
     }
 
+    @Operation(summary = "Cập nhật thông tin người dùng")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cập nhật người dùng thành công"),
+            @ApiResponse(responseCode = "417", description = "Cập nhật thất bại")
+    })
     @PutMapping("/update")
     public ResponseEntity<ResponseDto> updateUser(@RequestBody UserDto userDto) {
         boolean isUpdated = userService.updateUser(userDto);
@@ -56,6 +80,12 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Xóa người dùng theo email")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Xóa người dùng thành công"),
+            @ApiResponse(responseCode = "417", description = "Xóa thất bại"),
+            @ApiResponse(responseCode = "400", description = "Yêu cầu sai, email không hợp lệ")
+    })
     @DeleteMapping("/delete")
     public ResponseEntity<ResponseDto> deleteUser(@RequestParam
                                                       @Email(message = "Email address should be a valid value")

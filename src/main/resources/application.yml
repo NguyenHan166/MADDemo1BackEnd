@@ -16,22 +16,22 @@ spring:
     password: ${APP_PASSWORD}
   config:
     import: optional:file:.env[.properties]
-  application:
-    name: MADDemo1
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
-            client-secret: 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
-            client-id: 56330466237-a6mhq0bt60d0d2r46ulhjpij6pbm42lv.apps.googleusercontent.com
-            scope: profile, email
-        provider:
-          google:
-            authorization-uri: https://accounts.google.com/o/oauth2/auth
-            token-uri: https://oauth2.googleapis.com/token
-            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+#  application:
+#    name: MADDemo1
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            redirect-uri: http://localhost:8080/login/oauth2/code/google
+#            client-secret: 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
+#            client-id: 56330466237-a6mhq0bt60d0d2r46ulhjpij6pbm42lv.apps.googleusercontent.com
+#            scope: profile, email
+#        provider:
+#          google:
+#            authorization-uri: https://accounts.google.com/o/oauth2/auth
+#            token-uri: https://oauth2.googleapis.com/token
+#            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
   jpa:
     hibernate:
       ddl-auto: update
@@ -45,6 +45,10 @@ spring:
     jpa:
       repositories:
         enabled: true
+
+springdoc:
+  api-docs:
+    version: openapi_3_0
 
 
 #  spring.application.name=MADDemo1

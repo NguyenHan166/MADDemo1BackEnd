@@ -101,12 +101,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            log.atInfo().log("debug jwt chain" + exception.getMessage());
+            log.atInfo().log("debug jwt chain: " + exception.getMessage());
             sendErrorResponse(response, exception.getMessage());
         }
     }
 
     private void sendErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
+
+        if (response.isCommitted()) {
+            // Nếu response đã được committed, bạn có thể xử lý tình huống này một cách khác, ví dụ:
+            return;  // Không làm gì thêm nếu response đã được gửi
+        }
         // Tạo ErrorResponseDto
         ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
                 "Request failed", // Mô tả yêu cầu, có thể lấy từ webRequest

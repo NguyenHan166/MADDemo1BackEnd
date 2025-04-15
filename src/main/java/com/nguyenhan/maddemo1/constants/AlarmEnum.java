@@ -5,5 +5,8 @@ public enum AlarmEnum {
     KHOAHOC,
     BUOIHOC,
     BAITAP,
-    CVCANHAN
+    CVCANHAN,
+    RUNG,
+    KHONGRUNG,
+    ON,OFF
 }

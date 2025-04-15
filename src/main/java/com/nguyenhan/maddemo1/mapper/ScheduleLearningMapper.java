@@ -7,25 +7,23 @@ import com.nguyenhan.maddemo1.model.ScheduleLearning;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import com.nguyenhan.maddemo1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ScheduleLearningMapper {
 
-    private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private final UserService userService;
 
-    public ScheduleLearningMapper(UserRepository userRepository, CourseRepository courseRepository) {
-        this.userRepository = userRepository;
+    public ScheduleLearningMapper(UserService userService, CourseRepository courseRepository) {
+        this.userService = userService;
         this.courseRepository = courseRepository;
     }
 
     public ScheduleLearning mapToScheduleLearning(ScheduleLearningDto scheduleLearningDto, ScheduleLearning scheduleLearning) {
-        User user = userRepository.findById(scheduleLearningDto.getUserID()).orElseThrow(
-                () -> new ResourceNotFoundException("User", "userId", scheduleLearningDto.getUserID().toString())
-        );
-        scheduleLearning.setId(scheduleLearningDto.getId());
+        User user = userService.getAuthenticatedUser();
         scheduleLearning.setUser(user);
         scheduleLearning.setLearningAddresses(scheduleLearningDto.getLearningAddresses());
         scheduleLearning.setDescription(scheduleLearningDto.getDescription());
@@ -53,7 +51,6 @@ public class ScheduleLearningMapper {
         scheduleLearningDto.setTimeEnd(scheduleLearning.getTimeEnd());
         scheduleLearningDto.setTimeStart(scheduleLearning.getTimeStart());
         if (scheduleLearning.getCourse() != null) scheduleLearningDto.setCourseID(scheduleLearning.getCourse().getId());
-        scheduleLearningDto.setUserID(scheduleLearning.getUser().getId());
         return scheduleLearningDto;
     }
 
