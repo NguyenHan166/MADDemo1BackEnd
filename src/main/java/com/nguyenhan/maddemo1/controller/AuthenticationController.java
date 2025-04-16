@@ -46,35 +46,35 @@ public class AuthenticationController {
         return ResponseEntity.status(UsersConstants.STATUS_201).body(registeredUser);
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
-//        User authenticatedUser = authenticationService.authenticate(loginUserDto);
-//        String jwtToken = jwtService.generateToken(authenticatedUser);
-//        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
-//        return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
-//    }
-
-    @Operation(summary = "Đăng nhập người dùng", description = "Đăng nhập người dùng bằng email và mật khẩu.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Thông tin đăng nhập không hợp lệ")
-    })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(
-            @Parameter(description = "Email của người dùng", required = true)
-            @RequestParam
-            @Email(message = "Email address should be a valid value")
-            String email,
-            @Parameter(description = "Password của người dùng", required = true)
-            @RequestParam String password) {
-        LoginUserDto loginUserDto = new LoginUserDto();
-        loginUserDto.setEmail(email);
-        loginUserDto.setPassword(password);
+    public ResponseEntity<LoginResponse> authenticate(@Valid @RequestBody LoginUserDto loginUserDto) {
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
         return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
     }
+
+//    @Operation(summary = "Đăng nhập người dùng", description = "Đăng nhập người dùng bằng email và mật khẩu.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Đăng nhập thành công", content = @io.swagger.v3.oas.annotations.media.Content(mediaType = "application/json", schema = @io.swagger.v3.oas.annotations.media.Schema(implementation = LoginResponse.class))),
+//            @ApiResponse(responseCode = "401", description = "Thông tin đăng nhập không hợp lệ")
+//    })
+//    @PostMapping("/login")
+//    public ResponseEntity<LoginResponse> authenticate(
+//            @Parameter(description = "Email của người dùng", required = true)
+//            @RequestParam
+//            @Email(message = "Email address should be a valid value")
+//            String email,
+//            @Parameter(description = "Password của người dùng", required = true)
+//            @RequestParam String password) {
+//        LoginUserDto loginUserDto = new LoginUserDto();
+//        loginUserDto.setEmail(email);
+//        loginUserDto.setPassword(password);
+//        User authenticatedUser = authenticationService.authenticate(loginUserDto);
+//        String jwtToken = jwtService.generateToken(authenticatedUser);
+//        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+//        return ResponseEntity.status(UsersConstants.STATUS_200).body(loginResponse);
+//    }
 
 //    @PostMapping("/verify")
 //    public ResponseEntity<ResponseDto> verifyUser(@Valid @RequestBody VerifyUserDto verifyUserDto) {
