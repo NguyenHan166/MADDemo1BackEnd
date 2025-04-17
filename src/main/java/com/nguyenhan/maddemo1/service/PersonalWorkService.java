@@ -71,8 +71,7 @@ public class PersonalWorkService {
         PersonalWork personalWork = personalWorkRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("PersonalWork", "id", id.toString())
         );
-        log.info(personalWork.toString());
-//        personalWorkRepository.delete(personalWork);
+
         personalWorkRepository.deleteById(id);
         log.info("PersonalWork with ID {} deleted successfully.", id);
     }

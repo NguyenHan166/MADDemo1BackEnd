@@ -62,48 +62,4 @@ public class PersonalWorkController {
     public ResponseEntity<List<PersonalWork>> getByUserId(){
         return ResponseEntity.status(ResponseConstants.STATUS_200).body(personalWorkService.getPersonalWorksByUserId());
     }
-
-//    @GetMapping("/getByCourseId/{courseId}")
-//    public ResponseEntity<List<PersonalWork>> getByCourseId(@PathVariable Long courseId){
-//        return ResponseEntity.status(ResponseConstants.STATUS_200).body(personalWorkService.getPersonalWorksByCourseId(courseId));
-//    }
-
-//    @GetMapping("/")
-//    public ResponseEntity<List<CourseDto>> getAllCourses(@RequestParam Long userId) {
-//        List<CourseDto> courseDtosList = new ArrayList<>();
-//        courseService.listCoursesOfUser(userId).forEach(
-//                course -> {
-//                    CourseDto courseDto = courseMapper.mapToCourseDto(course, new CourseDto());
-//                    courseDtosList.add(courseDto);
-//                }
-//        );
-//        return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseDtosList);
-//    }
-//
-//    @GetMapping("/fetch")
-//    public ResponseEntity<CourseDto> getCourse(@RequestParam Long courseId) {
-//        Course course = courseService.findById(courseId);
-//        CourseDto courseDto = courseMapper.mapToCourseDto(course, new CourseDto());
-//        return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseDto);
-//    }
-//
-//    @PutMapping("/update")
-//    public ResponseEntity<CourseDto> updateCourse(@RequestParam Long courseId ,@Valid @RequestBody CourseDto courseDto) {
-//        boolean isUpdate = courseService.updateCourse(courseId, courseDto);
-//        if (isUpdate) {
-//            return ResponseEntity.status(ResponseConstants.STATUS_417).body(courseDto);
-//        }else{
-//            return ResponseEntity.status(ResponseConstants.STATUS_417).body(courseDto);
-//        }
-//    }
-//
-//    @DeleteMapping("/delete")
-//    public ResponseEntity<ResponseDto> deleteCourse(@RequestParam Long courseId) {
-//        boolean isDelete = courseService.deleteCourse(courseId);
-//        if (isDelete) {
-//            return ResponseEntity.status(ResponseConstants.STATUS_200).body(new ResponseDto(ResponseConstants.STATUS_200, ResponseConstants.MESSAGE_200));
-//        }else{
-//            return ResponseEntity.status(ResponseConstants.STATUS_400).body(new ResponseDto(ResponseConstants.STATUS_417, ResponseConstants.MESSAGE_417_DELETE));
-//        }
-//    }
 }

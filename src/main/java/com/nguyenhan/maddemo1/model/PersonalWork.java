@@ -1,6 +1,7 @@
 package com.nguyenhan.maddemo1.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "personalworks")
 @Getter@Setter@NoArgsConstructor@AllArgsConstructor
-@ToString(exclude = "users")
 public class PersonalWork extends BaseEntity{
 
     @Id
@@ -28,7 +28,7 @@ public class PersonalWork extends BaseEntity{
 
     @ManyToOne()
     @JoinColumn(name = "userID")
-    @JsonBackReference
+    @JsonIgnore
     private User user;
 
 //    @OneToOne(mappedBy = "personalWork", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
