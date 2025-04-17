@@ -12,11 +12,12 @@ import java.time.LocalDateTime;
 @Getter@Setter@AllArgsConstructor@NoArgsConstructor
 public class ScheduleLearningDto {
     private Long id;
-    private String description;
+    private String name;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
     private String teacher;
     private String learningAddresses;
-    private String state;
+    private String state;// notyet, vang,comat
+    private String note;
     private Long courseID;
 }

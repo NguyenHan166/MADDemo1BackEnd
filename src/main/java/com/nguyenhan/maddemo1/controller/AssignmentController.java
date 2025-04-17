@@ -1,6 +1,7 @@
 package com.nguyenhan.maddemo1.controller;
 
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
+import com.nguyenhan.maddemo1.constants.StateAssignment;
 import com.nguyenhan.maddemo1.dto.AssignmentDto;
 import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
 import com.nguyenhan.maddemo1.model.Assignment;
@@ -66,6 +67,11 @@ public class AssignmentController {
 
     @PostMapping("/create")
     public ResponseEntity<Object> createAssignment(@RequestBody AssignmentDto assignmentDto) {
+        if (LocalDateTime.now().isAfter(assignmentDto.getTimeEnd())){
+            assignmentDto.setState(StateAssignment.QUAHAN.toString());
+        }else if (LocalDateTime.now().isBefore(assignmentDto.getTimeEnd())){
+            assignmentDto.setState(StateAssignment.CHUAHOANTHANH.toString());
+        }
         Assignment assignment = assignmentService.create(assignmentDto);
         assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);
         return ResponseEntity.status(ResponseConstants.STATUS_201).body(assignmentDto);

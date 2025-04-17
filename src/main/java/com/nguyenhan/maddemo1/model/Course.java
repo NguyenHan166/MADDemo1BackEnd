@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,16 +19,18 @@ public class Course extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
     private String name;
-    private String description;
     private String teacher;
-    private LocalDateTime timeStart;
-    private LocalDateTime timeEnd;
-    private int numberOfLesion;
+    private LocalDate timeStart;
+    private LocalDate timeEnd;
+    private String numberOfLessons;
+    private String numberOfAssignments;
+    private String credits;
     private String addressLearning;
     private String state="ongoing"; // ongoing, pending, finish
-    private String repeatTime;
+    private String listDay;
+    private String repeatType;
+    private String note;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")

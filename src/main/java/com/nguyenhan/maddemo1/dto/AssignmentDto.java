@@ -10,6 +10,7 @@ public class AssignmentDto {
     private Long id;
     private String name;
     private LocalDateTime timeEnd;
-    private String state;
+    private String state; //incomplete,completed,expired
+    private String note;
     private Long courseId;
 }

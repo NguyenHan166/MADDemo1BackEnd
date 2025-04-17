@@ -25,8 +25,9 @@ public class ScheduleLearningMapper {
     public ScheduleLearning mapToScheduleLearning(ScheduleLearningDto scheduleLearningDto, ScheduleLearning scheduleLearning) {
         User user = userService.getAuthenticatedUser();
         scheduleLearning.setUser(user);
+        scheduleLearning.setName(scheduleLearningDto.getName());
         scheduleLearning.setLearningAddresses(scheduleLearningDto.getLearningAddresses());
-        scheduleLearning.setDescription(scheduleLearningDto.getDescription());
+        scheduleLearning.setNote(scheduleLearningDto.getNote());
         scheduleLearning.setTeacher(scheduleLearningDto.getTeacher());
         scheduleLearning.setState(scheduleLearningDto.getState());
         scheduleLearning.setTimeEnd(scheduleLearningDto.getTimeEnd());
@@ -44,8 +45,9 @@ public class ScheduleLearningMapper {
 
     public ScheduleLearningDto mapToScheduleLearningDto(ScheduleLearning scheduleLearning, ScheduleLearningDto scheduleLearningDto) {
         scheduleLearningDto.setId(scheduleLearning.getId());
+        scheduleLearningDto.setName(scheduleLearning.getName());
         scheduleLearningDto.setLearningAddresses(scheduleLearning.getLearningAddresses());
-        scheduleLearningDto.setDescription(scheduleLearning.getDescription());
+        scheduleLearningDto.setNote(scheduleLearning.getNote());
         scheduleLearningDto.setTeacher(scheduleLearning.getTeacher());
         scheduleLearningDto.setState(scheduleLearning.getState());
         scheduleLearningDto.setTimeEnd(scheduleLearning.getTimeEnd());

@@ -61,7 +61,7 @@ public class AlarmController {
         return  ResponseEntity.status(ResponseConstants.STATUS_200).body(alarmDto);
     }
 
-    @PostMapping("/crate")
+    @PostMapping("/create")
     public ResponseEntity<Object> crateAlarm(@RequestBody AlarmDto alarmDto) {
         Alarm alarm = alarmService.createAlarm(alarmDto);
         return ResponseEntity.status(ResponseConstants.STATUS_201).body(alarm);

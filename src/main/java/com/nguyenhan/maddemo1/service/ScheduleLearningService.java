@@ -10,12 +10,14 @@ import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.ScheduleLearningRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class ScheduleLearningService {
 
     private final ScheduleLearningRepository scheduleLearningRepository;
@@ -36,9 +38,8 @@ public class ScheduleLearningService {
         return scheduleLearningRepository.findAll();
     }
 
-    public List<ScheduleLearning> findAllByUser() {
-        Long userID = userService.getAuthenticatedUser().getId();
-        return scheduleLearningRepository.findAllByUserId(userID);
+    public List<ScheduleLearning> findAllByUser(User user) {
+        return scheduleLearningRepository.findByUser(user);
     }
 
     public ScheduleLearning fetchScheduleLearning(Long scheduleLearningID) {

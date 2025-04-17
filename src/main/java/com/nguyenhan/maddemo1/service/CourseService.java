@@ -1,6 +1,6 @@
 package com.nguyenhan.maddemo1.service;
 
-import com.nguyenhan.maddemo1.dto.CourseDto;
+import com.nguyenhan.maddemo1.dto.CourseInputDto;
 import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.CourseMapper;
@@ -14,12 +14,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Service
 @Slf4j
+@Transactional
 public class CourseService {
 
     private final CourseRepository courseRepository;
@@ -49,7 +51,7 @@ public class CourseService {
         return courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", "id", id.toString()));
     }
 
-    public Course createCourse(CourseDto courseDto) {
+    public Course createCourse(CourseInputDto courseDto) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         for (Course course : user.getCourses()) {
@@ -62,12 +64,12 @@ public class CourseService {
         }
 
         Course course = new Course();
-//        log.atInfo().log("Creating new course " + course.getCreatedBy());
         courseMapper.mapToCourse(courseDto, course);
+        log.atInfo().log("Creating new course " + course.getName());
         return courseRepository.save(course);
     }
 
-    public boolean updateCourse(Long id, CourseDto courseDto) {
+    public boolean updateCourse(Long id, CourseInputDto courseDto) {
 
         boolean isUpdate = false;
         Course course = courseRepository.findById(id).orElseThrow(
@@ -102,7 +104,7 @@ public class CourseService {
     }
 
     // Lấy các khóa học trong khoảng thời gian cho trước
-    public List<Course> getCoursesBetweenTimes(LocalDateTime startTime, LocalDateTime endTime) {
+    public List<Course> getCoursesBetweenTimes(LocalDate startTime, LocalDate endTime) {
         return courseRepository.findByTimeStartGreaterThanEqualAndTimeEndLessThanEqual(startTime, endTime);
     }
 
@@ -114,5 +116,9 @@ public class CourseService {
         courseRepository.deleteById(id);
         isDelete = true;
         return isDelete;
+    }
+
+    public Course save(Course course) {
+        return courseRepository.save(course);
     }
 }

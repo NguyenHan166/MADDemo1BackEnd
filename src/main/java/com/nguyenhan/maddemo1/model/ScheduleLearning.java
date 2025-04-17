@@ -13,13 +13,13 @@ public class ScheduleLearning extends BaseEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-
-    private String description;
+    private String name;
+    private String note;
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
     private String teacher;
     private String learningAddresses;
-    private String state;
+    private String state="notyet";
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")

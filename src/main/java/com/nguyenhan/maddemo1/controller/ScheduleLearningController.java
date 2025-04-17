@@ -1,6 +1,7 @@
 package com.nguyenhan.maddemo1.controller;
 
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
+import com.nguyenhan.maddemo1.constants.StateScheduleLearning;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
 import com.nguyenhan.maddemo1.mapper.ScheduleLearningMapper;
 import com.nguyenhan.maddemo1.model.Course;
@@ -43,20 +44,20 @@ public class ScheduleLearningController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Object> fetchAllScheduleLearningOfUSer(@RequestParam Long userId) {
+    public ResponseEntity<Object> fetchAllScheduleLearningOfUSer() {
 
         User findUser = userService.getAuthenticatedUser();
-        if (!findUser.getId().equals(userId)) {
-            return ResponseEntity.status(ResponseConstants.STATUS_409).body(new ErrorResponseDto(
-                    "/api/scheduleLearnings/{userId}",
-                    ResponseConstants.STATUS_409,
-                    ResponseConstants.MESSAGE_409,
-                    LocalDateTime.now()
-            ));
-        }
+//        if (!findUser.getId().equals(userId)) {
+//            return ResponseEntity.status(ResponseConstants.STATUS_409).body(new ErrorResponseDto(
+//                    "/api/scheduleLearnings/{userId}",
+//                    ResponseConstants.STATUS_409,
+//                    ResponseConstants.MESSAGE_409,
+//                    LocalDateTime.now()
+//            ));
+//        }
 
         List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
-        scheduleLearningService.findAllByUser().forEach(
+        scheduleLearningService.findAllByUser(findUser).forEach(
             scheduleLearning -> {
                 scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
             }
@@ -65,9 +66,16 @@ public class ScheduleLearningController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ScheduleLearning> createScheduleLearning(@RequestBody ScheduleLearningDto dto) {
+    public ResponseEntity<ScheduleLearningDto> createScheduleLearning(@RequestBody ScheduleLearningDto dto) {
+        if (LocalDateTime.now().isBefore(dto.getTimeStart())){
+            dto.setState(StateScheduleLearning.CHUADEN.toString());
+        }else if (LocalDateTime.now().isAfter(dto.getTimeEnd())){
+            dto.setState(StateScheduleLearning.VANG.toString());
+        }else{
+            dto.setState(StateScheduleLearning.COMAT.toString());
+        }
         ScheduleLearning scheduleLearning = scheduleLearningService.createScheduleLearning(dto);
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearning);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, dto));
     }
 
     @PutMapping("/update")

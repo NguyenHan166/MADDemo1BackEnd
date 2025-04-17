@@ -20,6 +20,7 @@ public class Assignment extends BaseEntity{
     private String name;
     private LocalDateTime timeEnd;
     private String state;
+    private String note;
 
     @ManyToOne
     @JoinColumn(name = "courseID")

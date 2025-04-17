@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface ScheduleLearningRepository extends JpaRepository<ScheduleLearning, Long> {
 
-    List<ScheduleLearning> findAllByUserId(Long userId);
+    List<ScheduleLearning> findByUser(User user);
 
     Long user(User user);
     List<ScheduleLearning> findByCourseOrderByTimeStartAsc(Course course);
