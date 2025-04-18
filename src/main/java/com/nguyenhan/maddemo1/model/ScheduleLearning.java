@@ -1,6 +1,7 @@
 package com.nguyenhan.maddemo1.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.nguyenhan.maddemo1.constants.StateLesson;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +20,9 @@ public class ScheduleLearning extends BaseEntity{
     private LocalDateTime timeEnd;
     private String teacher;
     private String learningAddresses;
-    private String state;
+
+    @Enumerated(EnumType.STRING)
+    private StateLesson stateLesson;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")

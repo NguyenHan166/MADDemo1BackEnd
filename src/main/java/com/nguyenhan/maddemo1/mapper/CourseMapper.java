@@ -1,10 +1,9 @@
 package com.nguyenhan.maddemo1.mapper;
 
 import com.nguyenhan.maddemo1.dto.CourseDto;
+import com.nguyenhan.maddemo1.dto.CourseResponseDto;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
-import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.model.Course;
-import com.nguyenhan.maddemo1.model.ScheduleLearning;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import com.nguyenhan.maddemo1.service.UserService;
@@ -19,12 +18,14 @@ public class CourseMapper {
 
     private final UserRepository userRepository; // Không cần static
     private final UserService userService;
+//    private final AssignmentMapper assignmentMapper;
     public ScheduleLearningMapper scheduleLearningMapper;
 
     @Autowired // Tiêm UserRepository qua constructor
     public CourseMapper(UserRepository userRepository, UserService userService, ScheduleLearningMapper scheduleLearningMapper) {
         this.userRepository = userRepository;
         this.userService = userService;
+//        this.assignmentMapper = assignmentMapper;
         this.scheduleLearningMapper = scheduleLearningMapper;
     }
 
@@ -62,5 +63,29 @@ public class CourseMapper {
         courseDto.setState(course.getState());
         courseDto.setScheduleLearningList(scheduleLearningDtos);
         return courseDto;
+    }
+
+    public CourseResponseDto mapToCourseResponseDto(Course course){
+
+        List<ScheduleLearningDto> scheduleLearningDtos = new ArrayList<>();
+
+        course.getScheduleLearnings().forEach(
+                scheduleLearning -> {
+                    scheduleLearningDtos.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+                }
+        );
+
+        CourseResponseDto courseResponseDto = new CourseResponseDto();
+        courseResponseDto.setId(course.getId());
+        courseResponseDto.setName(course.getName());
+        courseResponseDto.setDescription(course.getDescription());
+        courseResponseDto.setTeacher(course.getTeacher());
+        courseResponseDto.setTimeEnd(course.getTimeEnd());
+        courseResponseDto.setTimeStart(course.getTimeStart());
+        courseResponseDto.setAddressLearning(course.getAddressLearning());
+        courseResponseDto.setState(course.getState());
+        courseResponseDto.setScheduleLearningList(scheduleLearningDtos);
+//        courseResponseDto.setAssignmentDtoList(assignmentMapper.mapToAssignmentDtoList(course.getAssignments()));
+        return courseResponseDto;
     }
 }

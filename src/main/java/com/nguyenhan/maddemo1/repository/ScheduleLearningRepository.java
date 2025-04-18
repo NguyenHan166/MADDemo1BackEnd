@@ -18,4 +18,5 @@ public interface ScheduleLearningRepository extends JpaRepository<ScheduleLearni
     List<ScheduleLearning> findByCourseOrderByTimeStartAsc(Course course);
     List<ScheduleLearning> findByCourseAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(
             Course course ,LocalDateTime startTime, LocalDateTime endTime);
+    List<ScheduleLearning> findByUserIdAndTimeStartBetween(Long userId, LocalDateTime start, LocalDateTime end);
 }

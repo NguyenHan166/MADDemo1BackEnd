@@ -8,6 +8,9 @@ import com.nguyenhan.maddemo1.service.CourseService;
 import com.nguyenhan.maddemo1.service.UserService;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class AssignmentMapper {
 
@@ -22,7 +25,7 @@ public class AssignmentMapper {
     public Assignment mapToAssignment(AssignmentDto assignmentDto, Assignment assignment){
         assignment.setName(assignmentDto.getName());
         assignment.setTimeEnd(assignmentDto.getTimeEnd());
-        assignment.setState(assignmentDto.getState());
+        assignment.setStateAssignment(assignmentDto.getStateAssignment());
         return assignment;
     }
 
@@ -31,7 +34,16 @@ public class AssignmentMapper {
         assignmentDto.setCourseId(assignment.getCourse().getId());
         assignmentDto.setName(assignment.getName());
         assignmentDto.setTimeEnd(assignment.getTimeEnd());
-        assignmentDto.setState(assignment.getState());
+        assignmentDto.setStateAssignment(assignment.getStateAssignment());
         return assignmentDto;
+    }
+
+    public List<AssignmentDto> mapToAssignmentDtoList(List<Assignment> assignments) {
+        return assignments.stream()
+                .map(assignment -> {
+                    AssignmentDto dto = new AssignmentDto();
+                    return mapToAssignmentDto(assignment, dto);
+                })
+                .collect(Collectors.toList());
     }
 }

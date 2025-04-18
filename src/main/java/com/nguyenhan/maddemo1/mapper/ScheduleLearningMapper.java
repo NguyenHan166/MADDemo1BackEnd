@@ -28,7 +28,7 @@ public class ScheduleLearningMapper {
         scheduleLearning.setLearningAddresses(scheduleLearningDto.getLearningAddresses());
         scheduleLearning.setDescription(scheduleLearningDto.getDescription());
         scheduleLearning.setTeacher(scheduleLearningDto.getTeacher());
-        scheduleLearning.setState(scheduleLearningDto.getState());
+        scheduleLearning.setStateLesson(scheduleLearningDto.getStateLesson());
         scheduleLearning.setTimeEnd(scheduleLearningDto.getTimeEnd());
         scheduleLearning.setTimeStart(scheduleLearningDto.getTimeStart());
 
@@ -47,7 +47,7 @@ public class ScheduleLearningMapper {
         scheduleLearningDto.setLearningAddresses(scheduleLearning.getLearningAddresses());
         scheduleLearningDto.setDescription(scheduleLearning.getDescription());
         scheduleLearningDto.setTeacher(scheduleLearning.getTeacher());
-        scheduleLearningDto.setState(scheduleLearning.getState());
+        scheduleLearningDto.setStateLesson(scheduleLearning.getStateLesson());
         scheduleLearningDto.setTimeEnd(scheduleLearning.getTimeEnd());
         scheduleLearningDto.setTimeStart(scheduleLearning.getTimeStart());
         if (scheduleLearning.getCourse() != null) scheduleLearningDto.setCourseID(scheduleLearning.getCourse().getId());

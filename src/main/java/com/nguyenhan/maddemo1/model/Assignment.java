@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.model;
 
+import com.nguyenhan.maddemo1.constants.StateAssignment;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,9 @@ public class Assignment extends BaseEntity{
 
     private String name;
     private LocalDateTime timeEnd;
-    private String state;
+
+    @Enumerated(EnumType.STRING)
+    private StateAssignment stateAssignment;
 
     @ManyToOne
     @JoinColumn(name = "courseID")

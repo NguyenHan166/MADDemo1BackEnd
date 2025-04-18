@@ -1,13 +1,13 @@
 package com.nguyenhan.maddemo1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import com.nguyenhan.maddemo1.constants.repeatCycle;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +30,10 @@ public class PersonalWorkDto {
     private LocalDateTime timeEnd;
 
     private String workAddress;
-    private String loopValue;
+
+    @Enumerated(EnumType.STRING)
+    private repeatCycle repeatCycle;
+
     private Long userId;
 //    private Long courseId;
 
