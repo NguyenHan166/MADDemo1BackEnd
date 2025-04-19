@@ -1,6 +1,9 @@
 package com.nguyenhan.maddemo1.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.nguyenhan.maddemo1.constants.repeatCycle;
+import com.nguyenhan.maddemo1.constants.StateAssignment;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,10 +11,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "personalworks")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter@Setter@NoArgsConstructor@AllArgsConstructor
 public class PersonalWork extends BaseEntity{
 
     @Id
@@ -24,8 +24,12 @@ public class PersonalWork extends BaseEntity{
     private LocalDateTime timeStart;
     private LocalDateTime timeEnd;
     private String workAddress;
-    private String loopValue;
-    private String state;
+
+    @Enumerated(EnumType.STRING)
+    private repeatCycle repeatCycle;
+
+    @Enumerated(EnumType.STRING)
+    private StateAssignment state;
 
 
     @ManyToOne(fetch = FetchType.LAZY)

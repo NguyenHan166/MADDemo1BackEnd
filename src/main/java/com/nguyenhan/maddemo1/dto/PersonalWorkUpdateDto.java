@@ -1,6 +1,9 @@
 package com.nguyenhan.maddemo1.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.nguyenhan.maddemo1.constants.repeatCycle;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Future;
 import lombok.*;
@@ -26,7 +29,9 @@ public class PersonalWorkUpdateDto {
     private LocalDateTime timeEnd;
 
     private String workAddress;
-    private String loopValue;
+
+    @Enumerated(EnumType.STRING)
+    private com.nguyenhan.maddemo1.constants.repeatCycle repeatCycle;
 
     @AssertTrue(message = "Thời gian kết thúc không được trước thời gian bắt đầu")
     public boolean isValidTimeRange(){

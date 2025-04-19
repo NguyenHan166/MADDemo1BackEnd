@@ -76,9 +76,9 @@ public class AssignmentController {
     @PostMapping("/create")
     public ResponseEntity<Object> createAssignment(@RequestBody AssignmentDto assignmentDto) {
         if (LocalDateTime.now().isAfter(assignmentDto.getTimeEnd())){
-            assignmentDto.setState(StateAssignment.Overdue.toString());
+            assignmentDto.setState(StateAssignment.OVERDUE);
         }else if (LocalDateTime.now().isBefore(assignmentDto.getTimeEnd())){
-            assignmentDto.setState(StateAssignment.Incomplete.toString());
+            assignmentDto.setState(StateAssignment.INCOMPLETE);
         }
         Assignment assignment = assignmentService.create(assignmentDto);
         assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);

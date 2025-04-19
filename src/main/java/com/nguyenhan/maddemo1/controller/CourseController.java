@@ -1,6 +1,8 @@
 package com.nguyenhan.maddemo1.controller;
 
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
+import com.nguyenhan.maddemo1.constants.StateCourse;
+import com.nguyenhan.maddemo1.constants.StateLesson;
 import com.nguyenhan.maddemo1.constants.StateScheduleLearning;
 import com.nguyenhan.maddemo1.dto.CourseDetailsDto;
 import com.nguyenhan.maddemo1.dto.CourseInputDto;
@@ -30,6 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.plaf.nimbus.State;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -107,11 +110,11 @@ public class CourseController {
                 countLesson++;
                 scheduleLearningDto.setName("Buổi số " + countLesson);
                 if (LocalDateTime.now().isBefore(start)) {
-                    scheduleLearningDto.setState(StateScheduleLearning.NotYet.toString());
+                    scheduleLearningDto.setState(StateLesson.NOT_YET);
                 } else if (LocalDateTime.now().isAfter(scheduleLearningDto.getTimeEnd())) {
-                    scheduleLearningDto.setState(StateScheduleLearning.Absent.toString());
+                    scheduleLearningDto.setState(StateLesson.ABSENT);
                 } else {
-                    scheduleLearningDto.setState(StateScheduleLearning.Present.toString());
+                    scheduleLearningDto.setState(StateLesson.PRESENT);
                 }
                 scheduleLearnings.add(scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning()));
 
@@ -147,11 +150,11 @@ public class CourseController {
             countLesson++;
             scheduleLearningDto.setName("Buổi số " + countLesson);
             if (LocalDateTime.now().isBefore(startDateTime)) {
-                scheduleLearningDto.setState(StateScheduleLearning.NotYet.toString());
+                scheduleLearningDto.setState(StateLesson.NOT_YET);
             } else if (LocalDateTime.now().isAfter(scheduleLearningDto.getTimeEnd())) {
-                scheduleLearningDto.setState(StateScheduleLearning.Absent.toString());
+                scheduleLearningDto.setState(StateLesson.ABSENT);
             } else {
-                scheduleLearningDto.setState(StateScheduleLearning.Present.toString());
+                scheduleLearningDto.setState(StateLesson.PRESENT);
             }
             scheduleLearnings.add(scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning()));
 
@@ -192,11 +195,11 @@ public class CourseController {
                 countLesson++;
                 scheduleLearningDto.setName("Buổi học " + countLesson);
                 if (LocalDateTime.now().isBefore(lessonStartTime)) {
-                    scheduleLearningDto.setState(StateScheduleLearning.NotYet.toString());
+                    scheduleLearningDto.setState(StateLesson.NOT_YET);
                 } else if (LocalDateTime.now().isAfter(lessonEndTime)) {
-                    scheduleLearningDto.setState(StateScheduleLearning.Absent.toString());
+                    scheduleLearningDto.setState(StateLesson.ABSENT);
                 } else {
-                    scheduleLearningDto.setState(StateScheduleLearning.Present.toString());
+                    scheduleLearningDto.setState(StateLesson.PRESENT);
                 }
                 scheduleLearnings.add(scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning()));
 
@@ -228,11 +231,11 @@ public class CourseController {
 
     private void setStateCourse(CourseInputDto courseDto, Course course) {
         if (LocalDateTime.now().isBefore(courseDto.getTimeStart().atStartOfDay())) {
-            course.setState("notyet");
+            course.setState(StateCourse.NOT_YET);
         } else if (LocalDateTime.now().isAfter(courseDto.getTimeEnd().atStartOfDay())) {
-            course.setState("end");
+            course.setState(StateCourse.END);
         } else {
-            course.setState("ongoing");
+            course.setState(StateCourse.ONGOING);
         }
     }
 

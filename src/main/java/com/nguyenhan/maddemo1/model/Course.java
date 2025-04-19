@@ -3,6 +3,8 @@ package com.nguyenhan.maddemo1.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.nguyenhan.maddemo1.constants.Review;
+import com.nguyenhan.maddemo1.constants.StateCourse;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +15,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "courses")
-@Getter@Setter@NoArgsConstructor@AllArgsConstructor@ToString
+@Getter@Setter@NoArgsConstructor@AllArgsConstructor
 public class Course extends BaseEntity{
 
     @Id
@@ -27,7 +29,8 @@ public class Course extends BaseEntity{
     private String numberOfAssignments;
     private String credits;
     private String addressLearning;
-    private State state="ongoing"; // ongoing, pending, finish
+    @Enumerated(EnumType.STRING)
+    private StateCourse state; // ongoing, pending, finish
     private String listDay;
     private String repeatType;
     private String note;

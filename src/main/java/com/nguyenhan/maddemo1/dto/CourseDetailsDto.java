@@ -1,5 +1,8 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.constants.StateCourse;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,7 +27,8 @@ public class CourseDetailsDto {
     private String addressLearning;
     private String repeatType;
     private String listDay;
-    private String state;
+    @Enumerated(EnumType.STRING)
+    private StateCourse state;
     private String note;
     private List<ScheduleLearningDto> scheduleLearningList;
     private List<AssignmentDto> assignmentList;

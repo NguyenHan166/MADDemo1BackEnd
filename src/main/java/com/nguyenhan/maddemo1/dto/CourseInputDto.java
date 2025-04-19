@@ -1,5 +1,8 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.constants.StateCourse;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -26,6 +29,7 @@ public class CourseInputDto {
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endLessonTime;
     private String repeatType;
-    private String state;// notyet,ongoing,end
+    @Enumerated(EnumType.STRING)
+    private StateCourse state;
     private String listDay;
 }

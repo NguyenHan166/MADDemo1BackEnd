@@ -1,10 +1,8 @@
 package com.nguyenhan.maddemo1.mapper;
 
-
 import com.nguyenhan.maddemo1.dto.PersonalWorkDto;
 import com.nguyenhan.maddemo1.dto.PersonalWorkUpdateDto;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
-import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.PersonalWork;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
@@ -49,7 +47,7 @@ public class PersonalWorkMapper {
         personalWork.setTimeStart(personalWorkDto.getTimeStart());
         personalWork.setCreate_at(personalWorkDto.getCreate_at());
         personalWork.setWorkAddress(personalWorkDto.getWorkAddress());
-        personalWork.setLoopValue(personalWorkDto.getLoopValue());
+        personalWork.setRepeatCycle(personalWorkDto.getRepeatCycle());
         personalWork.setUser(user);
 
 
@@ -83,6 +81,7 @@ public class PersonalWorkMapper {
         personalWork.setTimeEnd(personalWorkUpdateDto.getTimeEnd());
         personalWork.setTimeStart(personalWorkUpdateDto.getTimeStart());
         personalWork.setWorkAddress(personalWorkUpdateDto.getWorkAddress());
-        personalWork.setLoopValue(personalWorkUpdateDto.getLoopValue());
+        personalWork.setRepeatCycle(personalWorkUpdateDto.getRepeatCycle());
+
     }
 }

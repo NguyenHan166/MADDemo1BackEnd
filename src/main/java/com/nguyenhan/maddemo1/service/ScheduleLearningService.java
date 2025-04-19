@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.service;
 
+import com.nguyenhan.maddemo1.constants.StateLesson;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
 import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
@@ -103,7 +104,7 @@ public class ScheduleLearningService {
         return isUpdated;
     }
 
-    public ScheduleLearning updateStateScheduleLearning(Long scheduleLearningID, String newState) {
+    public ScheduleLearning updateStateScheduleLearning(Long scheduleLearningID, StateLesson newState) {
         ScheduleLearning scheduleLearning = scheduleLearningRepository.findById(scheduleLearningID).orElseThrow(
                 () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID" , scheduleLearningID.toString())
         );

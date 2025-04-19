@@ -1,6 +1,7 @@
 package com.nguyenhan.maddemo1.controller;
 
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
+import com.nguyenhan.maddemo1.constants.StateLesson;
 import com.nguyenhan.maddemo1.constants.StateScheduleLearning;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
 import com.nguyenhan.maddemo1.mapper.ScheduleLearningMapper;
@@ -74,11 +75,11 @@ public class ScheduleLearningController {
     @PostMapping("/create")
     public ResponseEntity<ScheduleResponse> createScheduleLearning(@RequestBody ScheduleLearningDto dto) {
         if (LocalDateTime.now().isBefore(dto.getTimeStart())){
-            dto.setState(StateScheduleLearning.NotYet.toString());
+            dto.setState(StateLesson.NOT_YET);
         }else if (LocalDateTime.now().isAfter(dto.getTimeEnd())){
-            dto.setState(StateScheduleLearning.Absent.toString());
+            dto.setState(StateLesson.ABSENT);
         }else{
-            dto.setState(StateScheduleLearning.Present.toString());
+            dto.setState(StateLesson.PRESENT);
         }
         ScheduleLearning scheduleLearning = scheduleLearningService.createScheduleLearning(dto);
         scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, dto);

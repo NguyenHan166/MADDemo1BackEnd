@@ -1,5 +1,8 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.constants.StateAssignment;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -9,8 +12,9 @@ import java.time.LocalDateTime;
 public class AssignmentDto {
     private Long id;
     private String name;
-    private LocalDateTime timeEnd;
-    private String state; //incomplete,completed,expired
     private String note;
+    private LocalDateTime timeEnd;
+    @Enumerated(EnumType.STRING)
+    private StateAssignment state;
     private Long courseId;
 }

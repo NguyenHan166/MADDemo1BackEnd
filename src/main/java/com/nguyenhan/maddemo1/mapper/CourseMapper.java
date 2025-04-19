@@ -97,5 +97,28 @@ public class CourseMapper {
         return courseListOutputDto;
     }
 
+    public CourseResponseDto mapToCourseResponseDto(Course course){
+
+        List<ScheduleLearningDto> scheduleLearningDtos = new ArrayList<>();
+
+        course.getScheduleLearnings().forEach(
+                scheduleLearning -> {
+                    scheduleLearningDtos.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+                }
+        );
+
+        CourseResponseDto courseResponseDto = new CourseResponseDto();
+        courseResponseDto.setId(course.getId());
+        courseResponseDto.setName(course.getName());
+        courseResponseDto.setNote(course.getNote());
+        courseResponseDto.setTeacher(course.getTeacher());
+        courseResponseDto.setTimeEnd(course.getTimeEnd());
+        courseResponseDto.setTimeStart(course.getTimeStart());
+        courseResponseDto.setAddressLearning(course.getAddressLearning());
+        courseResponseDto.setState(course.getState());
+        courseResponseDto.setScheduleLearningList(scheduleLearningDtos);
+//        courseResponseDto.setAssignmentDtoList(assignmentMapper.mapToAssignmentDtoList(course.getAssignments()));
+        return courseResponseDto;
+    }
 
 }
