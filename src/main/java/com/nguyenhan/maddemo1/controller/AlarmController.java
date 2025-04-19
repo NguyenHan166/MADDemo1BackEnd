@@ -32,20 +32,11 @@ public class AlarmController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Object> getAllByUserId(@RequestParam Long userId) {
+    public ResponseEntity<Object> getAllByUserId() {
         User user = userService.getAuthenticatedUser();
-        if (!user.getId().equals(userId)) {
-            return ResponseEntity.status(ResponseConstants.STATUS_409).body(new ErrorResponseDto(
-                            "/api/courses/",
-                            ResponseConstants.STATUS_409,
-                            ResponseConstants.MESSAGE_409,
-                            LocalDateTime.now()
-                    )
-            );
-        }
 
         List<AlarmDto> alarmDtos = new ArrayList<>();
-        alarmService.findAllByUserId(userId).forEach(
+        alarmService.findAllByUserId(user.getId()).forEach(
                 alarm -> {
                     alarmDtos.add(alarmMapper.mapToAlarmDto(alarm, new AlarmDto()));
                 }

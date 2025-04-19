@@ -9,21 +9,23 @@ import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import com.nguyenhan.maddemo1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ScheduleLearningMapper {
 
     private final CourseRepository courseRepository;
-    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public ScheduleLearningMapper(UserService userService, CourseRepository courseRepository) {
-        this.userService = userService;
+    public ScheduleLearningMapper(UserRepository userRepository, CourseRepository courseRepository) {
+        this.userRepository = userRepository;
         this.courseRepository = courseRepository;
     }
 
     public ScheduleLearning mapToScheduleLearning(ScheduleLearningDto scheduleLearningDto, ScheduleLearning scheduleLearning) {
-        User user = userService.getAuthenticatedUser();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         scheduleLearning.setUser(user);
         scheduleLearning.setName(scheduleLearningDto.getName());
         scheduleLearning.setLearningAddresses(scheduleLearningDto.getLearningAddresses());

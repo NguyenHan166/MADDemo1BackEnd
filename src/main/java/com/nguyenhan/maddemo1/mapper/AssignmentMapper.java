@@ -6,27 +6,32 @@ import com.nguyenhan.maddemo1.model.Assignment;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
+import com.nguyenhan.maddemo1.repository.UserRepository;
 import com.nguyenhan.maddemo1.service.CourseService;
 import com.nguyenhan.maddemo1.service.UserService;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AssignmentMapper {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     private final CourseRepository courseRepository;
 
-    public AssignmentMapper(UserService userService, CourseRepository courseRepository) {
-        this.userService = userService;
+    public AssignmentMapper(UserRepository userRepository, CourseRepository courseRepository) {
+        this.userRepository = userRepository;
         this.courseRepository = courseRepository;
     }
 
     public Assignment mapToAssignment(AssignmentDto assignmentDto, Assignment assignment){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+
         assignment.setName(assignmentDto.getName());
         assignment.setTimeEnd(assignmentDto.getTimeEnd());
         assignment.setState(assignmentDto.getState());
         assignment.setNote(assignmentDto.getNote());
-        assignment.setUser(userService.getAuthenticatedUser());
+        assignment.setUser(user);
 
         if (assignmentDto.getCourseId() != null) {
             Course course = courseRepository.findById(assignmentDto.getCourseId()).orElseThrow(

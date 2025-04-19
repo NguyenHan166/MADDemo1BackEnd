@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,11 +23,13 @@ public class Assignment extends BaseEntity{
     private String state;
     private String note;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "courseID")
+    @JsonBackReference
     private Course course;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")
+    @JsonBackReference
     private User user;
 }

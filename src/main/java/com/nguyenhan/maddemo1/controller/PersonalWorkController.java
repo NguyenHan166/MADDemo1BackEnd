@@ -8,6 +8,8 @@ import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.PersonalWork;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.PersonalWorkRepository;
+import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
+import com.nguyenhan.maddemo1.responses.PersonalWorkResponse;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.CourseService;
 import com.nguyenhan.maddemo1.service.PersonalWorkService;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,31 +41,56 @@ public class PersonalWorkController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PersonalWork> createPersonalWork(@Valid @RequestBody PersonalWorkDto request) {
+    public ResponseEntity<Object> createPersonalWork(@Valid @RequestBody PersonalWorkDto request) {
 
         log.info("Controller create");
-        User user = personalWorkService.getCurrentUser();
+        User user = userService.getAuthenticatedUser();
         request.setUserId(user.getId());
         log.info("Controller email: {}", user.getEmail());
 
         PersonalWork personalWork = personalWorkService.createPersonalWork(request);
-        return ResponseEntity.status(ResponseConstants.STATUS_201).body(personalWork);
+        request = personalWorkMapper.toPersonalWorkDto(personalWork);
+        PersonalWorkResponse response = new PersonalWorkResponse();
+        response.setPersonalWork(request);
+        return ResponseEntity.status(ResponseConstants.STATUS_201).body(response);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<PersonalWork> updatePersonalWork(@Valid @RequestBody PersonalWorkUpdateDto request, @PathVariable Long id){
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(personalWorkService.updatePersonalWork(request, id));
+    @PutMapping("/update")
+    public ResponseEntity<Object> updatePersonalWork(@Valid @RequestBody PersonalWorkUpdateDto request, @RequestParam Long id){
+        PersonalWork personalWork = personalWorkService.updatePersonalWork(request, id);
+        PersonalWorkDto personalWorkDto = personalWorkMapper.toPersonalWorkDto(personalWork);
+        PersonalWorkResponse response = new PersonalWorkResponse();
+        response.setPersonalWork(personalWorkDto);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
-    @DeleteMapping("/{id}")
-    public String deletePersonalWork(@Valid @PathVariable Long id){
-        personalWorkService.deletePersonalWork(id);
-        return "Personal Work has been deleted";
+    @DeleteMapping("/delete")
+    public ResponseEntity<Object> deletePersonalWork(@Valid @RequestParam Long id){
+        boolean isSuccess = personalWorkService.deletePersonalWork(id);
+        if (isSuccess){
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(new ResponseDto(ResponseConstants.STATUS_200 , ResponseConstants.MESSAGE_200));
+        }else{
+            return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
+                    "api/personalwork/delete",
+                    ResponseConstants.STATUS_417,
+                    ResponseConstants.MESSAGE_417_DELETE,
+                    LocalDateTime.now()
+            ));
+        }
+
     }
 
-    @GetMapping("/getByUserId")
-    public ResponseEntity<List<PersonalWork>> getByUserId(){
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(personalWorkService.getPersonalWorksByUserId());
+    @GetMapping("/getByUser")
+    public ResponseEntity<Object> getByUser(){
+        List<PersonalWork> personalWorks = personalWorkService.getPersonalWorksByUserId();
+        List<PersonalWorkDto> personalWorkDtos = new ArrayList<>();
+        personalWorks.forEach(personalWork -> {
+            PersonalWorkDto dto = personalWorkMapper.toPersonalWorkDto(personalWork);
+            personalWorkDtos.add(dto);
+        });
+        PersonalWorkResponse response = new PersonalWorkResponse();
+        response.setPersonalWorks(personalWorkDtos);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
 //    @GetMapping("/getByCourseId/{courseId}")

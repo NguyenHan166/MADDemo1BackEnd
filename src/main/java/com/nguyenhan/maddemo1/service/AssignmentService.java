@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.service;
 
+import com.nguyenhan.maddemo1.constants.StateAssignment;
 import com.nguyenhan.maddemo1.dto.AssignmentDto;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
@@ -10,11 +11,14 @@ import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.AssignmentRepository;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.ScheduleLearningRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
 public class AssignmentService {
 
     private final AssignmentRepository assignmentRepository;
@@ -72,6 +76,7 @@ public class AssignmentService {
         }
 
         assignmentMapper.mapToAssignment(assignmentDto, assignment);
+
         assignmentRepository.save(assignment);
         isUpdated = true;
         return isUpdated;
@@ -82,7 +87,10 @@ public class AssignmentService {
         Assignment assignment = assignmentRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Assignment" , "Id" , id.toString())
         );
-        scheduleLearningRepository.deleteById(id);
+
+        log.atInfo().log("Deleting Assignment");
+        assignmentRepository.deleteById(id);
+        log.atInfo().log("Deleted Assignment successfully");
         isDeleted = true;
         return isDeleted;
     }

@@ -7,6 +7,7 @@ import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
 import com.nguyenhan.maddemo1.model.Assignment;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.User;
+import com.nguyenhan.maddemo1.responses.AssignmentResponse;
 import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.AssignmentService;
@@ -44,7 +45,9 @@ public class AssignmentController {
             assignmentDtos.add(assignmentMapper.mapToAssignmentDto(assignment, new AssignmentDto()));
         });
 
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(assignmentDtos);
+        AssignmentResponse response = new AssignmentResponse();
+        response.setAssignments(assignmentDtos);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @GetMapping("/course")
@@ -57,33 +60,42 @@ public class AssignmentController {
         assignments.forEach(assignment -> {
             assignmentDtos.add(assignmentMapper.mapToAssignmentDto(assignment, new AssignmentDto()));
         });
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(assignmentDtos);
+        AssignmentResponse response = new AssignmentResponse();
+        response.setAssignments(assignmentDtos);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @GetMapping("/fetch")
     public ResponseEntity<Object> fetchAssignmentDetails(@RequestParam Long assignmentID) {
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(assignmentService.findById(assignmentID));
+        Assignment assignment = assignmentService.findById(assignmentID);
+        AssignmentResponse response = new AssignmentResponse();
+        response.setAssignment(assignmentMapper.mapToAssignmentDto(assignment, new AssignmentDto()));
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @PostMapping("/create")
     public ResponseEntity<Object> createAssignment(@RequestBody AssignmentDto assignmentDto) {
         if (LocalDateTime.now().isAfter(assignmentDto.getTimeEnd())){
-            assignmentDto.setState(StateAssignment.QUAHAN.toString());
+            assignmentDto.setState(StateAssignment.Overdue.toString());
         }else if (LocalDateTime.now().isBefore(assignmentDto.getTimeEnd())){
-            assignmentDto.setState(StateAssignment.CHUAHOANTHANH.toString());
+            assignmentDto.setState(StateAssignment.Incomplete.toString());
         }
         Assignment assignment = assignmentService.create(assignmentDto);
         assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);
-        return ResponseEntity.status(ResponseConstants.STATUS_201).body(assignmentDto);
+        AssignmentResponse response = new AssignmentResponse();
+        response.setAssignment(assignmentDto);
+        return ResponseEntity.status(ResponseConstants.STATUS_201).body(response);
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Object> updateAssignment(Long id , @RequestBody AssignmentDto assignmentDto) {
+    public ResponseEntity<Object> updateAssignment(@RequestParam Long id , @RequestBody AssignmentDto assignmentDto) {
         boolean success = assignmentService.update(id, assignmentDto);
         if (success) {
             Assignment assignment = assignmentService.findById(id);
             assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);
-            return ResponseEntity.status(ResponseConstants.STATUS_200).body(assignmentDto);
+            AssignmentResponse response = new AssignmentResponse();
+            response.setAssignment(assignmentDto);
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
         }else{
             return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
                     "/api/assignments/update",
@@ -95,7 +107,7 @@ public class AssignmentController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Object> deleteAssignment(Long id) {
+    public ResponseEntity<Object> deleteAssignment(@RequestParam Long id) {
         boolean success = assignmentService.delete(id);
         if (success) {
             return ResponseEntity.status(ResponseConstants.STATUS_200).body(new ResponseDto(ResponseConstants.STATUS_200, ResponseConstants.MESSAGE_200));

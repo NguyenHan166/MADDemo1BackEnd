@@ -12,23 +12,21 @@ import java.time.LocalDateTime;
 public class PersonalWorkUpdateDto {
 
 //    @NotNull(message = "Tên công việc không được bỏ trống")
-//    private String name;
+    private String name;
 
     private String description;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime create_at = LocalDateTime.now();
 
-    @Future(message = "Thời gian bắt đầu không được trước thời điểm hiện tại")
+//    @Future(message = "Thời gian bắt đầu không được trước thời điểm hiện tại")
     private LocalDateTime timeStart;
 
-    @Future(message = "Thời gian kết thúc không được trước thời điểm hiện tại")
+//    @Future(message = "Thời gian kết thúc không được trước thời điểm hiện tại")
     private LocalDateTime timeEnd;
 
     private String workAddress;
     private String loopValue;
-    //    private Long userId;
-    private Long courseId;
 
     @AssertTrue(message = "Thời gian kết thúc không được trước thời gian bắt đầu")
     public boolean isValidTimeRange(){

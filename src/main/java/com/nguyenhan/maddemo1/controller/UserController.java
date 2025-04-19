@@ -25,8 +25,10 @@ import java.util.List;
 @Slf4j
 public class UserController {
     private final UserService userService;
-    public UserController(UserService userService) {
+    private final UsersMapper usersMapper;
+    public UserController(UserService userService , UsersMapper usersMapper) {
         this.userService = userService;
+        this.usersMapper = usersMapper;
     }
 
 
@@ -39,7 +41,7 @@ public class UserController {
     public ResponseEntity<Object> getCurrentUserDto() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
-        UserDto  userDto = UsersMapper.mapToUserDto(currentUser, new UserDto());
+        UserDto  userDto = usersMapper.mapToUserDto(currentUser, new UserDto());
         return ResponseEntity.ok(userDto);
     }
 

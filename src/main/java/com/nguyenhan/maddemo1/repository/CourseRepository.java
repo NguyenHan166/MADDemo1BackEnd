@@ -19,6 +19,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // Truy vấn lấy các khóa học có trạng thái
     List<Course> findByUserAndState(User user ,String state);
     // Truy vấn lấy các khóa học có thời gian bắt đầu và kết thúc nằm trong khoảng thời gian
-    List<Course> findByTimeStartGreaterThanEqualAndTimeEndLessThanEqual(
-            LocalDate startTime, LocalDate endTime);
+    List<Course> findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(
+            User user ,LocalDate startTime, LocalDate endTime);
 }

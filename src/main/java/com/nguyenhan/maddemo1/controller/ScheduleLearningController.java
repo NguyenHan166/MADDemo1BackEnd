@@ -9,6 +9,7 @@ import com.nguyenhan.maddemo1.model.ScheduleLearning;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
+import com.nguyenhan.maddemo1.responses.ScheduleResponse;
 import com.nguyenhan.maddemo1.service.CourseService;
 import com.nguyenhan.maddemo1.service.ScheduleLearningService;
 import com.nguyenhan.maddemo1.service.UserService;
@@ -37,10 +38,12 @@ public class ScheduleLearningController {
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<ScheduleLearningDto> fetchScheduleLearningById(Long id) {
+    public ResponseEntity<ScheduleResponse> fetchScheduleLearningById(Long id) {
         ScheduleLearning scheduleLearning = scheduleLearningService.fetchScheduleLearning(id);
         ScheduleLearningDto dto = scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto());
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(dto);
+        ScheduleResponse response = new ScheduleResponse();
+        response.setScheduleLearning(dto);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @GetMapping("/")
@@ -62,27 +65,37 @@ public class ScheduleLearningController {
                 scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
             }
         );
-        return  ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
+
+        ScheduleResponse response = new ScheduleResponse();
+        response.setScheduleLearningList(scheduleLearningDtoList);
+        return  ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ScheduleLearningDto> createScheduleLearning(@RequestBody ScheduleLearningDto dto) {
+    public ResponseEntity<ScheduleResponse> createScheduleLearning(@RequestBody ScheduleLearningDto dto) {
         if (LocalDateTime.now().isBefore(dto.getTimeStart())){
-            dto.setState(StateScheduleLearning.CHUADEN.toString());
+            dto.setState(StateScheduleLearning.NotYet.toString());
         }else if (LocalDateTime.now().isAfter(dto.getTimeEnd())){
-            dto.setState(StateScheduleLearning.VANG.toString());
+            dto.setState(StateScheduleLearning.Absent.toString());
         }else{
-            dto.setState(StateScheduleLearning.COMAT.toString());
+            dto.setState(StateScheduleLearning.Present.toString());
         }
         ScheduleLearning scheduleLearning = scheduleLearningService.createScheduleLearning(dto);
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, dto));
+        scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, dto);
+        ScheduleResponse response = new ScheduleResponse();
+        response.setScheduleLearning(dto);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @PutMapping("/update")
     public ResponseEntity<Object> updateScheduleLearning(@RequestParam Long id, @RequestBody ScheduleLearningDto dto) {
         boolean isSuccess = scheduleLearningService.updateScheduleLearning(id, dto);
         if (isSuccess) {
-            return ResponseEntity.status(ResponseConstants.STATUS_200).body(dto);
+            ScheduleResponse response = new ScheduleResponse();
+            ScheduleLearning scheduleLearning = scheduleLearningService.fetchScheduleLearning(id);
+            scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, dto);
+            response.setScheduleLearning(dto);
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
         }else {
             return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ResponseDto(ResponseConstants.STATUS_417, ResponseConstants.MESSAGE_417_UPDATE));
         }
@@ -107,15 +120,17 @@ public class ScheduleLearningController {
                     scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
                 }
         );
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
+        ScheduleResponse response  = new ScheduleResponse();
+        response.setScheduleLearningList(scheduleLearningDtoList);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     // API lấy danh sách các buổi học trong khoảng thời gian
-    @GetMapping("/time")
-    public ResponseEntity<Object> getSchedulesBetweenTimes(
+    @GetMapping("/course/time")
+    public ResponseEntity<Object> getSchedulesBetweenTimesAndCourse(
             @RequestParam("courseId") Long courseId,
-            @RequestParam("startTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam("endTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+            @RequestParam("startTime")  LocalDateTime startTime,
+            @RequestParam("endTime")  LocalDateTime endTime) {
         Course course = courseService.findById(courseId);
         List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
         scheduleLearningService.getSchedulesBetweenTimes(course ,startTime, endTime).forEach(
@@ -123,6 +138,25 @@ public class ScheduleLearningController {
                     scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
                 }
         );
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(scheduleLearningDtoList);
+        ScheduleResponse response  = new ScheduleResponse();
+        response.setScheduleLearningList(scheduleLearningDtoList);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
+    }
+
+    @GetMapping("/user/time")
+    public ResponseEntity<Object> getSchedulesBetweenTimesAndUser(
+            @RequestParam("startTime")  LocalDateTime startTime,
+            @RequestParam("endTime")  LocalDateTime endTime
+    ){
+        User user = userService.getAuthenticatedUser();
+        List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
+        scheduleLearningService.getSchedulesBetweenTimesAndUser(user ,startTime, endTime).forEach(
+                scheduleLearning -> {
+                    scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+                }
+        );
+        ScheduleResponse response  = new ScheduleResponse();
+        response.setScheduleLearningList(scheduleLearningDtoList);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 }

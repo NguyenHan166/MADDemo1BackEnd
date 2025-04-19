@@ -11,13 +11,14 @@ import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.ScheduleLearningRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Transactional
+@Slf4j
 public class ScheduleLearningService {
 
     private final ScheduleLearningRepository scheduleLearningRepository;
@@ -84,6 +85,18 @@ public class ScheduleLearningService {
                 () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID" , scheduleLearningID.toString())
         );
 
+        User user = userService.getAuthenticatedUser();
+
+        boolean isContains = false;
+
+        for (ScheduleLearning s : user.getScheduleLearnings()){
+            if (s.getId().equals(scheduleLearningID)){
+                isContains = true;
+                break;
+            }
+        }
+
+        if (!isContains) throw new ResourceNotFoundException("ScheduleLearning of User", "scheduleLearningID" , scheduleLearningID.toString());
         scheduleLearning = scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto,scheduleLearning);
         scheduleLearningRepository.save(scheduleLearning);
         isUpdated = true;
@@ -106,4 +119,7 @@ public class ScheduleLearningService {
         return isDeleted;
     }
 
+    public List<ScheduleLearning> getSchedulesBetweenTimesAndUser(User user, LocalDateTime startTime, LocalDateTime endTime) {
+        return scheduleLearningRepository.findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(user, startTime, endTime);
+    }
 }

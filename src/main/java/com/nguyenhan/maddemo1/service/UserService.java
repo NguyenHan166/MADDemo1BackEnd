@@ -18,9 +18,11 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final UsersMapper usersMapper;
 
-    public UserService(UserRepository userRepository, EmailService emailService) {
+    public UserService(UserRepository userRepository, UsersMapper usersMapper) {
         this.userRepository = userRepository;
+        this.usersMapper = usersMapper;
     }
 
     public List<User> allUsers() {
@@ -39,15 +41,6 @@ public class UserService {
         return null;
     }
 
-    @Transactional
-    public UserDto getAuthenticatedUserDto() {
-        User user = getAuthenticatedUser();
-        if (user != null) {
-            return UsersMapper.mapToUserDto(user, new UserDto());
-        }
-        return null;
-    }
-
 
     // update user
     public boolean updateUser(UserDto userDto) {
@@ -57,7 +50,7 @@ public class UserService {
                 () -> new ResourceNotFoundException("User", "email", userDto.getEmail())
         );
 
-        UsersMapper.mapToUser(userDto, findUser);
+        usersMapper.mapToUser(userDto, findUser);
         userRepository.save(findUser);
 
         isUpdated = true;

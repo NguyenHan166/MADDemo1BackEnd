@@ -58,7 +58,7 @@ public class PersonalWorkMapper {
 
     public PersonalWorkDto toPersonalWorkDto(PersonalWork personalWork) {
         PersonalWorkDto personalWorkDto =new PersonalWorkDto();
-
+        personalWorkDto.setId(personalWork.getId());
         personalWorkDto.setName(personalWork.getName());
         personalWorkDto.setDescription(personalWork.getDescription());
         personalWorkDto.setTimeEnd(personalWork.getTimeEnd());
@@ -78,7 +78,7 @@ public class PersonalWorkMapper {
 //            );
 //            personalWork.setCourse(course);
 //        }
-
+        personalWork.setName(personalWorkUpdateDto.getName());
         personalWork.setDescription(personalWorkUpdateDto.getDescription());
         personalWork.setTimeEnd(personalWorkUpdateDto.getTimeEnd());
         personalWork.setTimeStart(personalWorkUpdateDto.getTimeStart());

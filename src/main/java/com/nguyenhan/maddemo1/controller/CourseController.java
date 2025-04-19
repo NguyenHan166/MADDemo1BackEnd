@@ -97,7 +97,7 @@ public class CourseController {
         }
         List<ScheduleLearning> scheduleLearnings = new ArrayList<>();
         for (LocalDate date : days) {
-            LocalDateTime start = date.atStartOfDay().withHour(courseDto.getStartLessonTime().getHour());
+            LocalDateTime start = date.atStartOfDay().withHour(courseDto.getStartLessonTime().getHour()).withMinute(courseDto.getStartLessonTime().getMinute());
             while (start.isBefore(endDateTime)) {
                 ScheduleLearningDto scheduleLearningDto = new ScheduleLearningDto();
                 scheduleLearningDto.setTimeStart(start);
@@ -107,11 +107,11 @@ public class CourseController {
                 countLesson++;
                 scheduleLearningDto.setName("Buổi số " + countLesson);
                 if (LocalDateTime.now().isBefore(start)) {
-                    scheduleLearningDto.setState(StateScheduleLearning.CHUADEN.toString());
-                } else if (LocalDateTime.now().isAfter(courseDto.getTimeEnd().atStartOfDay())) {
-                    scheduleLearningDto.setState(StateScheduleLearning.VANG.toString());
+                    scheduleLearningDto.setState(StateScheduleLearning.NotYet.toString());
+                } else if (LocalDateTime.now().isAfter(scheduleLearningDto.getTimeEnd())) {
+                    scheduleLearningDto.setState(StateScheduleLearning.Absent.toString());
                 } else {
-                    scheduleLearningDto.setState(StateScheduleLearning.COMAT.toString());
+                    scheduleLearningDto.setState(StateScheduleLearning.Present.toString());
                 }
                 scheduleLearnings.add(scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning()));
 
@@ -147,11 +147,11 @@ public class CourseController {
             countLesson++;
             scheduleLearningDto.setName("Buổi số " + countLesson);
             if (LocalDateTime.now().isBefore(startDateTime)) {
-                scheduleLearningDto.setState(StateScheduleLearning.CHUADEN.toString());
-            } else if (LocalDateTime.now().isAfter(courseDto.getTimeEnd().atStartOfDay())) {
-                scheduleLearningDto.setState(StateScheduleLearning.VANG.toString());
+                scheduleLearningDto.setState(StateScheduleLearning.NotYet.toString());
+            } else if (LocalDateTime.now().isAfter(scheduleLearningDto.getTimeEnd())) {
+                scheduleLearningDto.setState(StateScheduleLearning.Absent.toString());
             } else {
-                scheduleLearningDto.setState(StateScheduleLearning.COMAT.toString());
+                scheduleLearningDto.setState(StateScheduleLearning.Present.toString());
             }
             scheduleLearnings.add(scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning()));
 
@@ -191,6 +191,13 @@ public class CourseController {
                 scheduleLearningDto.setLearningAddresses(courseDto.getAddressLearning());
                 countLesson++;
                 scheduleLearningDto.setName("Buổi học " + countLesson);
+                if (LocalDateTime.now().isBefore(lessonStartTime)) {
+                    scheduleLearningDto.setState(StateScheduleLearning.NotYet.toString());
+                } else if (LocalDateTime.now().isAfter(lessonEndTime)) {
+                    scheduleLearningDto.setState(StateScheduleLearning.Absent.toString());
+                } else {
+                    scheduleLearningDto.setState(StateScheduleLearning.Present.toString());
+                }
                 scheduleLearnings.add(scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning()));
 
 
@@ -261,7 +268,9 @@ public class CourseController {
         boolean isUpdate = courseService.updateCourse(courseId, courseDto);
         if (isUpdate) {
             Course course = courseService.findById(courseId);
-            return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseMapper.mapToCourseDto(course, new CourseDetailsDto()));
+            CourseResponse courseResponse = new CourseResponse();
+            courseResponse.setCourse(courseMapper.mapToCourseDto(course, new CourseDetailsDto()));
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseResponse);
         } else {
             return ResponseEntity.status(ResponseConstants.STATUS_417).body(courseDto);
         }
@@ -284,7 +293,6 @@ public class CourseController {
     // API lấy các khóa học có trạng thái "Đang diễn ra"
     @GetMapping("/state")
     public ResponseEntity<Object> getCoursesByState(
-            @RequestParam Long userId,
             @RequestParam String state) {
         User user = userService.getAuthenticatedUser();
         List<CourseListOutputDto> courseDtosList = new ArrayList<>();
@@ -294,7 +302,9 @@ public class CourseController {
                     courseDtosList.add(courseDto);
                 }
         );
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseDtosList);
+        CourseResponse response = new CourseResponse();
+        response.setCourses(courseDtosList);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     // API lấy các khóa học trong khoảng thời gian cho trước
@@ -302,13 +312,16 @@ public class CourseController {
     public ResponseEntity<Object> getCoursesBetweenTimes(
             @RequestParam("startTime") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate startTime,
             @RequestParam("endTime") @DateTimeFormat(pattern = "dd/MM/yyyy") LocalDate endTime) {
+        User user = userService.getAuthenticatedUser();
         List<CourseListOutputDto> courseDtosList = new ArrayList<>();
-        courseService.getCoursesBetweenTimes(startTime, endTime).forEach(
+        courseService.getCoursesBetweenTimes(user ,startTime, endTime).forEach(
                 course -> {
                     CourseListOutputDto courseDto = courseMapper.mapToCourseListOutputDto(course, new CourseListOutputDto());
                     courseDtosList.add(courseDto);
                 }
         );
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseDtosList);
+        CourseResponse response = new CourseResponse();
+        response.setCourses(courseDtosList);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 }

@@ -1,10 +1,13 @@
 package com.nguyenhan.maddemo1.mapper;
 
 import com.nguyenhan.maddemo1.dto.*;
+import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.User;
+import com.nguyenhan.maddemo1.repository.UserRepository;
 import com.nguyenhan.maddemo1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -13,19 +16,20 @@ import java.util.List;
 @Component // Biến CourseMapper thành Spring Bean
 public class CourseMapper {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
     public ScheduleLearningMapper scheduleLearningMapper;
     public AssignmentMapper assignmentMapper;
 
     @Autowired // Tiêm UserRepository qua constructor
-    public CourseMapper(UserService userService, ScheduleLearningMapper scheduleLearningMapper, AssignmentMapper assignmentMapper) {
-        this.userService = userService;
+    public CourseMapper(UserRepository userRepository, ScheduleLearningMapper scheduleLearningMapper, AssignmentMapper assignmentMapper) {
+        this.userRepository = userRepository;
         this.scheduleLearningMapper = scheduleLearningMapper;
         this.assignmentMapper = assignmentMapper;
     }
 
     public Course mapToCourse(CourseInputDto courseDto, Course course) {
-        User user = userService.getAuthenticatedUser();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         course.setName(courseDto.getName());
         course.setNote(courseDto.getNote());
         course.setCredits(courseDto.getCredits());

@@ -66,7 +66,8 @@ public class PersonalWorkService {
     }
 
     @PreAuthorize("@personalWorkSecurity.isOwner(#id)")
-    public void deletePersonalWork(Long id){
+    public boolean deletePersonalWork(Long id){
+        boolean isDeleted = false;
         PersonalWork personalWork = personalWorkRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("PersonalWork", "id", id.toString())
         );
@@ -74,6 +75,8 @@ public class PersonalWorkService {
 //        personalWorkRepository.delete(personalWork);
         personalWorkRepository.deleteById(id);
         log.info("PersonalWork with ID {} deleted successfully.", id);
+        isDeleted = true;
+        return isDeleted;
     }
 
     public List<PersonalWork> getPersonalWorksByUserId(){

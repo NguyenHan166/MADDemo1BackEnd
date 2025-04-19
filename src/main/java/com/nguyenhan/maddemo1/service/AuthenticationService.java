@@ -27,17 +27,20 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final UsersMapper usersMapper;
 
     public AuthenticationService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            EmailService emailService
+            EmailService emailService,
+            UsersMapper usersMapper
     ) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.usersMapper = usersMapper;
     }
 
     public User signup(RegisterUserDto input) {
@@ -141,13 +144,13 @@ public class AuthenticationService {
             user.setVerificationCode(null);
             user.setVerificationCodeExpiresAt(null);
             User savedUser = userRepository.save(user);
-            return UsersMapper.mapToUserDto(savedUser, new UserDto());
+            return usersMapper.mapToUserDto(savedUser, new UserDto());
         } else {
             throw new VerificationCodeInvalid("Invalid verification code");
         }
     }
 
-    public UserDto changePassword(VerifyUserDto verifyUserDto,String oldPassword ,String newPassword) {
+    public UserDto changePassword(VerifyUserDto verifyUserDto, String oldPassword, String newPassword) {
         User user = userRepository.findByEmail(verifyUserDto.getEmail()).orElseThrow(
                 () -> new ResourceNotFoundException("User", "email", verifyUserDto.getEmail())
         );
@@ -155,8 +158,8 @@ public class AuthenticationService {
             throw new VerificationCodeInvalid("Verification code has expired");
         }
 
-        if (user.getVerificationCode().equals(verifyUserDto.getVerificationCode())){
-            if (passwordEncoder.encode(oldPassword).equals(user.getPassword())){
+        if (user.getVerificationCode().equals(verifyUserDto.getVerificationCode())) {
+            if (passwordEncoder.encode(oldPassword).equals(user.getPassword())) {
                 throw new PasswordIncorrectException("Passwords do not match");
             }
 
@@ -164,8 +167,8 @@ public class AuthenticationService {
             user.setVerificationCode(null);
             user.setVerificationCodeExpiresAt(null);
             userRepository.save(user);
-            return UsersMapper.mapToUserDto(user, new UserDto());
-        }else{
+            return usersMapper.mapToUserDto(user, new UserDto());
+        } else {
             throw new VerificationCodeInvalid("Invalid verification Code");
         }
     }
@@ -175,24 +178,25 @@ public class AuthenticationService {
         String verifyCode = generateVerificationCode();
         verifyUserDto.setEmail(email);
         verifyUserDto.setVerificationCode(verifyCode);
-        User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new ResourceNotFoundException("User", "email", email)
-        );
-        user.setVerificationCode(verifyCode);
-        user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
-        userRepository.save(user);
-        if (event.equals("ForgotPassword")){
+
+        if (event.equals("ForgotPassword")) {
+            User user = userRepository.findByEmail(email).orElseThrow(
+                    () -> new ResourceNotFoundException("User", "email" , email)
+            );
+            user.setVerificationCode(verifyCode);
+            user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
+            userRepository.save(user);
             sendVerificationEmailForgotPassword(user);
-        }else if (event.equals("VerifyUser")){
-            sendVerificationEmail(email,verifyCode);
-        }else if (event.equals("ChangePassword")){
-            sendVerificationEmailChangePassword(email,verifyCode);
+        } else if (event.equals("VerifyUser")) {
+            sendVerificationEmail(email, verifyCode);
+        } else if (event.equals("ChangePassword")) {
+            sendVerificationEmailChangePassword(email, verifyCode);
         }
 
         return verifyUserDto;
     }
 
-    private void sendVerificationEmail(String email ,String verifyCode) { //TODO: Update with company logo
+    private void sendVerificationEmail(String email, String verifyCode) { //TODO: Update with company logo
         String subject = "Account Verification";
         String verificationCode = "VERIFICATION CODE " + verifyCode;
         String htmlMessage = "<html>"
@@ -216,7 +220,7 @@ public class AuthenticationService {
         }
     }
 
-    private void sendVerificationEmailChangePassword(String email ,String verifyCode) { //TODO: Update with company logo
+    private void sendVerificationEmailChangePassword(String email, String verifyCode) { //TODO: Update with company logo
         String subject = "Change Password";
         String verificationCode = "VERIFICATION CODE " + verifyCode;
         String htmlMessage = "<html>"

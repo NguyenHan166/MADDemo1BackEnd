@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Getter@Setter
@@ -33,5 +34,11 @@ public class UserDto {
     @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
     @NotEmpty(message = "Mobile Phone not be empty")
     private String mobilePhone;
+
+    List <CourseListOutputDto> courseList;
+    List<AssignmentDto> assignmentList;
+    List<ScheduleLearningDto> scheduleLearningList;
+    List<AlarmDto> alarmList;
+    List<PersonalWorkDto> personalWorkList;
 
 }

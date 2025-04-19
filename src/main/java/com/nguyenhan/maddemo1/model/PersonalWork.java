@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "users")
 public class PersonalWork extends BaseEntity{
 
     @Id
@@ -29,16 +28,9 @@ public class PersonalWork extends BaseEntity{
     private String state;
 
 
-    @ManyToOne()
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")
     @JsonBackReference
     private User user;
 
-//    @OneToOne(mappedBy = "personalWork", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-//    @JsonBackReference
-//    private Note note;
-
-//    @ManyToOne(optional = true)
-//    @JoinColumn(name = "course", nullable = true)
-//    private Course course;
 }

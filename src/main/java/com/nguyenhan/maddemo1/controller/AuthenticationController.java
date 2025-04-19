@@ -60,16 +60,10 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "401", description = "Thông tin đăng nhập không hợp lệ")
     })
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(
-            @Parameter(description = "Email của người dùng", required = true)
-            @RequestParam
-            @Email(message = "Email address should be a valid value")
-            String email,
-            @Parameter(description = "Password của người dùng", required = true)
-            @RequestParam String password) {
-        LoginUserDto loginUserDto = new LoginUserDto();
-        loginUserDto.setEmail(email);
-        loginUserDto.setPassword(password);
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
+//        LoginUserDto loginUserDto = new LoginUserDto();
+//        loginUserDto.setEmail(email);
+//        loginUserDto.setPassword(password);
         User authenticatedUser = authenticationService.authenticate(loginUserDto);
         String jwtToken = jwtService.generateToken(authenticatedUser);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());

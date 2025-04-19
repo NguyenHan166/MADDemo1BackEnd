@@ -104,8 +104,8 @@ public class CourseService {
     }
 
     // Lấy các khóa học trong khoảng thời gian cho trước
-    public List<Course> getCoursesBetweenTimes(LocalDate startTime, LocalDate endTime) {
-        return courseRepository.findByTimeStartGreaterThanEqualAndTimeEndLessThanEqual(startTime, endTime);
+    public List<Course> getCoursesBetweenTimes(User user ,LocalDate startTime, LocalDate endTime) {
+        return courseRepository.findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(user ,startTime, endTime);
     }
 
     public boolean deleteCourse(Long id) {
