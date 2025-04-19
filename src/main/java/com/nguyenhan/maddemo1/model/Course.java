@@ -27,7 +27,7 @@ public class Course extends BaseEntity{
     private String numberOfAssignments;
     private String credits;
     private String addressLearning;
-    private String state="ongoing"; // ongoing, pending, finish
+    private State state="ongoing"; // ongoing, pending, finish
     private String listDay;
     private String repeatType;
     private String note;
