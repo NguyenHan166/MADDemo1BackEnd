@@ -66,6 +66,10 @@ public class User implements UserDetails {
     @JsonManagedReference
     private List<PersonalWork> personalWorks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @JsonManagedReference
+    private List<Notification> notifications = new ArrayList<>();
+
     //constructor for creating an unverified user
     public User() {
     }

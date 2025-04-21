@@ -1,12 +1,14 @@
 package com.nguyenhan.maddemo1.service;
 
 import com.nguyenhan.maddemo1.dto.AlarmDto;
+import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
+import com.nguyenhan.maddemo1.exception.ServerErrorException;
 import com.nguyenhan.maddemo1.mapper.AlarmMapper;
 import com.nguyenhan.maddemo1.model.Alarm;
 import com.nguyenhan.maddemo1.model.User;
-import com.nguyenhan.maddemo1.repository.AlarmRepository;
-import com.nguyenhan.maddemo1.repository.UserRepository;
+import com.nguyenhan.maddemo1.repository.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +19,17 @@ public class AlarmService {
     private final AlarmRepository alarmRepository;
     private final UserRepository userRepository;
     private final AlarmMapper alarmMapper;
+    private final ScheduleLearningRepository scheduleLearningRepository;
+    private final PersonalWorkRepository personalWorkRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    public AlarmService(AlarmRepository alarmRepository, UserRepository userRepository, AlarmMapper alarmMapper) {
+    public AlarmService(AlarmRepository alarmRepository, UserRepository userRepository, AlarmMapper alarmMapper, ScheduleLearningRepository learningRepository, PersonalWorkRepository personalWorkRepository, AssignmentRepository assignmentRepository) {
         this.alarmRepository = alarmRepository;
         this.userRepository = userRepository;
         this.alarmMapper = alarmMapper;
+        this.scheduleLearningRepository = learningRepository;
+        this.personalWorkRepository = personalWorkRepository;
+        this.assignmentRepository = assignmentRepository;
     }
 
     public List<Alarm> findAllByUserId(Long userId) {
@@ -35,12 +43,33 @@ public class AlarmService {
     }
 
     public Alarm createAlarm(AlarmDto alarmDto) {
-        User user = userRepository.findById(alarmDto.getUserId()).orElseThrow(
-                () -> new ResourceNotFoundException("User", "Id", alarmDto.getUserId().toString())
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new ResourceNotFoundException("User", "Email", email)
         );
 
-        Alarm alarm = new Alarm();
-        alarmMapper.mapToAlarm(alarmDto, alarm);
+        Alarm alarm = alarmMapper.mapToAlarm(alarmDto, new Alarm());
+
+        if (user.getAlarms().contains(alarm)) {
+            throw new ResourceAlreadyExistsException("Alarms", "name", alarm.getName());
+        }
+
+        if (alarm.getEntityId() != null){
+            if (alarm.getCategory().equals("LESSON")){
+                scheduleLearningRepository.findById(alarm.getEntityId()).orElseThrow(
+                        () -> new ResourceNotFoundException("ScheduleLearning", "Id", alarm.getEntityId().toString())
+                );
+            }else if (alarm.getCategory().equals("PERSONAL_WORK")){
+                personalWorkRepository.findById(alarm.getEntityId()).orElseThrow(
+                        () -> new ResourceNotFoundException("PersonalWork", "Id", alarm.getEntityId().toString())
+                );
+            }else{
+                assignmentRepository.findById(alarm.getEntityId()).orElseThrow(
+                        () -> new ResourceNotFoundException("Assignment", "Id", alarm.getEntityId().toString())
+                );
+            }
+        }
+
         return alarmRepository.save(alarm);
     }
 
@@ -50,11 +79,26 @@ public class AlarmService {
                 () -> new ResourceNotFoundException("Alarm", "Id", alarmId.toString())
         );
 
-        User user = userRepository.findById(alarmDto.getUserId()).orElseThrow(
-                () -> new ResourceNotFoundException("User", "Id", alarmDto.getUserId().toString())
-        );
 
         alarmMapper.mapToAlarm(alarmDto, alarm);
+
+        if (alarm.getEntityId() != null){
+            if (alarm.getCategory().equals("LESSON")){
+                scheduleLearningRepository.findById(alarm.getEntityId()).orElseThrow(
+                        () -> new ResourceNotFoundException("ScheduleLearning", "Id", alarm.getEntityId().toString())
+                );
+            }else if (alarm.getCategory().equals("PERSONAL_WORK")){
+                personalWorkRepository.findById(alarm.getEntityId()).orElseThrow(
+                        () -> new ResourceNotFoundException("PersonalWork", "Id", alarm.getEntityId().toString())
+                );
+            }else if(alarm.getCategory().equals("ASSIGNMENT")) {
+                assignmentRepository.findById(alarm.getEntityId()).orElseThrow(
+                        () -> new ResourceNotFoundException("Assignment", "Id", alarm.getEntityId().toString())
+                );
+            }else{
+                throw new ServerErrorException("Something went wrong");
+            }
+        }
         alarmRepository.save(alarm);
         isUpdated = true;
         return isUpdated;
@@ -69,4 +113,6 @@ public class AlarmService {
         isDeleted = true;
         return isDeleted;
     }
+
+
 }

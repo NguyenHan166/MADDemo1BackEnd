@@ -1,11 +1,16 @@
 package com.nguyenhan.maddemo1.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.nguyenhan.maddemo1.constants.AlarmCategory;
+import com.nguyenhan.maddemo1.constants.AlarmMode;
+import com.nguyenhan.maddemo1.constants.AlarmState;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "alarms")
@@ -17,14 +22,25 @@ public class Alarm extends BaseEntity{
     private Long id;
 
     private String name;
+    @Column(nullable = true)
     private Long entityId;
-    private String category;
-    private String dateAlarm;
+
+    @Enumerated(EnumType.STRING)
+    private AlarmCategory category;
     private LocalDateTime timeAlarm;
-    private String repeatDays;  // Lưu chuỗi các ngày lặp lại
-    private String mode;
+
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    @CollectionTable(name = "alarm_repeat_days", joinColumns = @JoinColumn(name = "alarm_id"))
+    @Column(name = "repeat_day")
+    private Set<DayOfWeek> repeatDays;  // Lưu chuỗi các ngày lặp lại
+
+    @Enumerated(EnumType.STRING)
+    private AlarmMode mode;
     private String music;
-    private String state;
+
+    @Enumerated(EnumType.STRING)
+    private AlarmState state;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userID")

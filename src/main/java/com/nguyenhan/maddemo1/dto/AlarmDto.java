@@ -1,22 +1,30 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.constants.AlarmCategory;
+import com.nguyenhan.maddemo1.constants.AlarmMode;
+import com.nguyenhan.maddemo1.constants.AlarmState;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Set;
 
 @Data
 @Getter@Setter@AllArgsConstructor@NoArgsConstructor
 public class AlarmDto {
-    private int id;
+    private Long id;
     private String name;
     private Long entityID;
-    private String category;
-    private String dateAlarm;
+    @Enumerated(EnumType.STRING)
+    private AlarmCategory category;
     private LocalDateTime timeAlarm;
-    private String repeatDays;  // Lưu chuỗi các ngày lặp lại
-    private String mode;
+    private Set<DayOfWeek> repeatDays;  // Lưu chuỗi các ngày lặp lại
+    @Enumerated(EnumType.STRING)
+    private AlarmMode mode;
     private String music;
-    private String state;
-    private Long userId;
+    @Enumerated(EnumType.STRING)
+    private AlarmState state;
 }

@@ -5,6 +5,7 @@ import com.nguyenhan.maddemo1.dto.AlarmDto;
 import com.nguyenhan.maddemo1.mapper.AlarmMapper;
 import com.nguyenhan.maddemo1.model.Alarm;
 import com.nguyenhan.maddemo1.model.User;
+import com.nguyenhan.maddemo1.responses.AlarmResponse;
 import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.AlarmService;
@@ -41,28 +42,38 @@ public class AlarmController {
                     alarmDtos.add(alarmMapper.mapToAlarmDto(alarm, new AlarmDto()));
                 }
         );
-
-        return ResponseEntity.status(ResponseConstants.STATUS_200).body(alarmDtos);
+        AlarmResponse response = new AlarmResponse();
+        response.setAlarms(alarmDtos);
+        return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @GetMapping("/fetch")
     public ResponseEntity<Object> fetchAlarms(@RequestParam Long alarmId) {
         Alarm alarm = alarmService.findById(alarmId);
         AlarmDto alarmDto = alarmMapper.mapToAlarmDto(alarm, new AlarmDto());
-        return  ResponseEntity.status(ResponseConstants.STATUS_200).body(alarmDto);
+        AlarmResponse response = new AlarmResponse();
+        response.setAlarm(alarmDto);
+        return  ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
     @PostMapping("/create")
     public ResponseEntity<Object> crateAlarm(@RequestBody AlarmDto alarmDto) {
         Alarm alarm = alarmService.createAlarm(alarmDto);
-        return ResponseEntity.status(ResponseConstants.STATUS_201).body(alarm);
+        alarmMapper.mapToAlarmDto(alarm, alarmDto);
+        AlarmResponse response = new AlarmResponse();
+        response.setAlarm(alarmDto);
+        return ResponseEntity.status(ResponseConstants.STATUS_201).body(response);
     }
 
     @PutMapping("/update")
     public ResponseEntity<Object> updateAlarm(@RequestParam Long alarmId ,@RequestBody AlarmDto alarmDto) {
         boolean isSuccess = alarmService.updateAlarm(alarmId, alarmDto);
         if (isSuccess) {
-            return ResponseEntity.status(ResponseConstants.STATUS_200).body(alarmDto);
+            Alarm alarm = alarmService.findById(alarmId);
+            alarmMapper.mapToAlarmDto(alarm, alarmDto);
+            AlarmResponse response = new AlarmResponse();
+            response.setAlarm(alarmDto);
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
         }else{
             return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ResponseDto(ResponseConstants.STATUS_417, ResponseConstants.MESSAGE_417_UPDATE));
         }

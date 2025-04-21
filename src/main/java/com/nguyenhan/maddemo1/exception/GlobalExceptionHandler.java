@@ -134,4 +134,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(ResponseConstants.STATUS_400));
     }
+
+    @ExceptionHandler(ServerErrorException.class)
+    public ResponseEntity<ErrorResponseDto> handleServerErrorException(ServerErrorException exception, WebRequest webRequest) {
+        ErrorResponseDto errorResponseDTO = new ErrorResponseDto(
+                webRequest.getDescription(false),
+                ResponseConstants.STATUS_400,
+                exception.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatusCode.valueOf(ResponseConstants.STATUS_400));
+    }
 }

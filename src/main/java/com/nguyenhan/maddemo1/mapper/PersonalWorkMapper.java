@@ -61,6 +61,7 @@ public class PersonalWorkMapper {
         personalWorkDto.setDescription(personalWork.getDescription());
         personalWorkDto.setTimeEnd(personalWork.getTimeEnd());
         personalWorkDto.setTimeStart(personalWork.getTimeStart());
+        personalWorkDto.setRepeatCycle(personalWork.getRepeatCycle());
         personalWorkDto.setCreate_at(personalWork.getCreate_at());
         personalWorkDto.setCreate_at(personalWork.getCreate_at());
         personalWorkDto.setWorkAddress(personalWork.getWorkAddress());

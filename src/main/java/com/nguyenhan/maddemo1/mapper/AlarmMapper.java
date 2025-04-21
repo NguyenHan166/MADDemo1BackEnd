@@ -6,6 +6,7 @@ import com.nguyenhan.maddemo1.model.Alarm;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,13 +20,15 @@ public class AlarmMapper {
     }
 
     public Alarm mapToAlarm(AlarmDto alarmDto, Alarm alarm) {
-        User user = userRepository.findById(alarmDto.getUserId()).orElseThrow(
-                () -> new ResourceNotFoundException("User", "ID", alarmDto.getUserId().toString())
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new ResourceNotFoundException("User", "email", email)
         );
 
-        alarm.setDateAlarm(alarmDto.getDateAlarm());
         alarm.setUser(user);
         alarm.setMode(alarmDto.getMode());
+        alarm.setEntityId(alarmDto.getEntityID());
         alarm.setCategory(alarmDto.getCategory());
         alarm.setMusic(alarmDto.getMusic());
         alarm.setName(alarmDto.getName());
@@ -36,11 +39,7 @@ public class AlarmMapper {
     }
 
     public AlarmDto mapToAlarmDto(Alarm alarm, AlarmDto alarmDto) {
-        User user = userRepository.findById(alarmDto.getUserId()).orElseThrow(
-                () -> new ResourceNotFoundException("User", "ID", alarmDto.getUserId().toString())
-        );
-        alarmDto.setUserId(user.getId());
-        alarmDto.setDateAlarm(alarm.getDateAlarm());
+
         alarmDto.setMode(alarm.getMode());
         alarmDto.setCategory(alarm.getCategory());
         alarmDto.setMusic(alarm.getMusic());
@@ -48,6 +47,8 @@ public class AlarmMapper {
         alarmDto.setState(alarm.getState());
         alarmDto.setTimeAlarm(alarm.getTimeAlarm());
         alarmDto.setRepeatDays(alarm.getRepeatDays());
+        alarmDto.setId(alarm.getId());
+        alarmDto.setEntityID(alarm.getEntityId());
         return alarmDto;
     }
 }
