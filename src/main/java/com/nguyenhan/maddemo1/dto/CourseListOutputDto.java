@@ -24,8 +24,8 @@ public class CourseListOutputDto {
     private LocalDate timeStart;
     @DateTimeFormat(pattern = "dd/MM/yyyy")
     private LocalDate timeEnd;
-    private String numberOfLesion;
-    private String numberOfAssignment;
+    private String numberOfLessons;
+    private String numberOfAssignments;
     private String addressLearning;
     @Enumerated(EnumType.STRING)
     private StateCourse state;// notyet,ongoing,end

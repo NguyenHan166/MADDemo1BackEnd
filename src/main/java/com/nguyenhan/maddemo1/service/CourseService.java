@@ -28,12 +28,14 @@ public class CourseService {
     private final UserRepository userRepository;
     private final CourseMapper courseMapper;
     private final UserService userService;
+    private final NotificationService notificationService;
 
-    public CourseService(CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper, UserService userService) {
+    public CourseService(CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper, UserService userService, NotificationService notificationService) {
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
         this.courseMapper = courseMapper;
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     public List<Course> listCourses() {
