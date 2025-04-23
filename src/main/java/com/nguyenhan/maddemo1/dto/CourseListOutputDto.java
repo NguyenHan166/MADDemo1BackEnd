@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.constants.RepeatTypeCourse;
 import com.nguyenhan.maddemo1.constants.StateCourse;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -27,6 +28,8 @@ public class CourseListOutputDto {
     private String numberOfLessons;
     private String numberOfAssignments;
     private String addressLearning;
+    @Enumerated(EnumType.STRING)
+    private RepeatTypeCourse repeatType;
     @Enumerated(EnumType.STRING)
     private StateCourse state;// notyet,ongoing,end
 }

@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.nguyenhan.maddemo1.constants.RepeatTypeCourse;
 import com.nguyenhan.maddemo1.constants.StateCourse;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -28,7 +29,8 @@ public class CourseInputDto {
     private LocalTime startLessonTime;
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime endLessonTime;
-    private String repeatType;
+    @Enumerated(EnumType.STRING)
+    private RepeatTypeCourse repeatType;
     @Enumerated(EnumType.STRING)
     private StateCourse state;
     private String listDay;

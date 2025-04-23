@@ -3,6 +3,7 @@ package com.nguyenhan.maddemo1.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.nguyenhan.maddemo1.constants.RepeatTypeCourse;
 import com.nguyenhan.maddemo1.constants.Review;
 import com.nguyenhan.maddemo1.constants.StateCourse;
 import jakarta.persistence.*;
@@ -32,7 +33,8 @@ public class Course extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private StateCourse state; // ongoing, pending, finish
     private String listDay;
-    private String repeatType;
+    @Enumerated(EnumType.STRING)
+    private RepeatTypeCourse repeatType;
     private String note;
 
     @ManyToOne(fetch = FetchType.LAZY)
