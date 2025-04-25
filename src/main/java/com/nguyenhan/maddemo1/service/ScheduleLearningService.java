@@ -1,18 +1,22 @@
 package com.nguyenhan.maddemo1.service;
 
+import com.nguyenhan.maddemo1.constants.NotificationCategory;
+import com.nguyenhan.maddemo1.constants.StateAssignment;
 import com.nguyenhan.maddemo1.constants.StateLesson;
+import com.nguyenhan.maddemo1.constants.StateNotification;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
 import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.ScheduleLearningMapper;
-import com.nguyenhan.maddemo1.model.Course;
-import com.nguyenhan.maddemo1.model.ScheduleLearning;
-import com.nguyenhan.maddemo1.model.User;
+import com.nguyenhan.maddemo1.model.*;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
+import com.nguyenhan.maddemo1.repository.NotificationRepository;
 import com.nguyenhan.maddemo1.repository.ScheduleLearningRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,13 +31,15 @@ public class ScheduleLearningService {
     private final CourseRepository courseRepository;
     private final ScheduleLearningMapper scheduleLearningMapper;
     private final UserService userService;
+    private final NotificationRepository notificationRepository;
 
-    public ScheduleLearningService(ScheduleLearningRepository scheduleLearningRepository, UserRepository userRepository, CourseRepository courseRepository, ScheduleLearningMapper scheduleLearningMapper, UserService userService) {
+    public ScheduleLearningService(ScheduleLearningRepository scheduleLearningRepository, UserRepository userRepository, CourseRepository courseRepository, ScheduleLearningMapper scheduleLearningMapper, UserService userService, NotificationRepository notificationRepository) {
         this.scheduleLearningRepository = scheduleLearningRepository;
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.scheduleLearningMapper = scheduleLearningMapper;
         this.userService = userService;
+        this.notificationRepository = notificationRepository;
     }
 
     public List<ScheduleLearning> findAll() {
@@ -122,5 +128,34 @@ public class ScheduleLearningService {
 
     public List<ScheduleLearning> getSchedulesBetweenTimesAndUser(User user, LocalDateTime startTime, LocalDateTime endTime) {
         return scheduleLearningRepository.findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(user, startTime, endTime);
+    }
+
+    @Scheduled(fixedRate = 1800000) // 30p
+    public void updateStateLessonScheduleTask() {
+        log.info("Update Status Assignment Start");
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+            List<ScheduleLearning> scheduleLearnings = scheduleLearningRepository.findByUserAndStateOrState(user, StateLesson.NOT_YET, StateLesson.ABSENT);
+            for (ScheduleLearning scheduleLearning : scheduleLearnings) {
+                if (LocalDateTime.now().isAfter(scheduleLearning.getTimeEnd())) {
+                    scheduleLearning.setState(StateLesson.ABSENT);
+                    Notification notification = new Notification();
+                    notification.setEventTime(scheduleLearning.getTimeStart());
+                    notification.setName(String.format("Lesson %s is overdue", scheduleLearning.getName()));
+                    notification.setState(StateNotification.UNREAD);
+                    notification.setCategory(NotificationCategory.LESSON);
+                    notification.setContent(String.format("Lesson %s is end at %s and you absent", scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
+                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                    notification.setEntityId(scheduleLearning.getId());
+                    notification.setUser(user);
+                    notificationRepository.save(notification);
+                }
+            }
+            scheduleLearningRepository.saveAll(scheduleLearnings);
+            log.info("Update Status ScheduleLearning End");
+        } else {
+            log.info("Please login to update Schedule Learning schedule task");
+        }
     }
 }

@@ -1,19 +1,22 @@
 package com.nguyenhan.maddemo1.service;
 
+import com.nguyenhan.maddemo1.constants.NotificationCategory;
+import com.nguyenhan.maddemo1.constants.StateAssignment;
+import com.nguyenhan.maddemo1.constants.StateNotification;
 import com.nguyenhan.maddemo1.dto.PersonalWorkDto;
 import com.nguyenhan.maddemo1.dto.PersonalWorkUpdateDto;
 import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.CourseMapper;
 import com.nguyenhan.maddemo1.mapper.PersonalWorkMapper;
-import com.nguyenhan.maddemo1.model.Course;
-import com.nguyenhan.maddemo1.model.PersonalWork;
-import com.nguyenhan.maddemo1.model.User;
+import com.nguyenhan.maddemo1.model.*;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
+import com.nguyenhan.maddemo1.repository.NotificationRepository;
 import com.nguyenhan.maddemo1.repository.PersonalWorkRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.nguyenhan.maddemo1.config.PersonalWorkSecurity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -29,13 +33,13 @@ import java.util.List;
 public class PersonalWorkService {
 
     private final PersonalWorkRepository personalWorkRepository;
-    private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final PersonalWorkMapper personalWorkMapper;
+    private final NotificationRepository notificationRepository;
 
-    public PersonalWorkService(PersonalWorkRepository personalWorkRepository, CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper, PersonalWorkMapper personalWorkMapper, PersonalWorkSecurity personalWorkSecurity) {
+    public PersonalWorkService(PersonalWorkRepository personalWorkRepository, UserRepository userRepository, PersonalWorkMapper personalWorkMapper, NotificationRepository notificationRepository) {
         this.personalWorkRepository = personalWorkRepository;
-        this.courseRepository = courseRepository;
+        this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.personalWorkMapper = personalWorkMapper;
     }
@@ -106,28 +110,34 @@ public class PersonalWorkService {
         return null; // hoặc throw exception nếu không tìm thấy
     }
 
+    @Scheduled(fixedRate = 1800000) // 30p
+    public void updateStatePersonalWorkScheduleTask() {
+        log.info("Update Status PersonalWork Start");
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+            List<PersonalWork> personalWorks = personalWorkRepository.findByUserAndState(user, StateAssignment.INCOMPLETE);
+            for (PersonalWork personalWork : personalWorks) {
+                if (LocalDateTime.now().isAfter(personalWork.getTimeEnd())) {
+                    personalWork.setState(StateAssignment.OVERDUE);
+                    Notification notification = new Notification();
+                    notification.setEventTime(personalWork.getTimeEnd());
+                    notification.setName(String.format("Personal Work %s is overdue", personalWork.getName()));
+                    notification.setState(StateNotification.UNREAD);
+                    notification.setCategory(NotificationCategory.PERSONAL_WORK);
+                    notification.setContent(String.format("Personal Work %s is overdue at %s", personalWork.getName(), personalWork.getTimeEnd().toString()));
+                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                    notification.setEntityId(personalWork.getId());
+                    notification.setUser(user);
+                    notificationRepository.save(notification);
+                }
+            }
+            personalWorkRepository.saveAll(personalWorks);
+            log.info("Update Status Personal Work End");
+        } else {
+            log.info("Please login to update personal work schedule task");
+        }
+    }
 
 
-//    public boolean updateCourse(Long id, CourseDto courseDto) {
-//
-//        boolean isUpdate = false;
-//        Course course = courseRepository.findById(id).orElseThrow(
-//                () -> new ResourceNotFoundException("Course", "id", id.toString())
-//        );
-//
-//        courseMapper.mapToCourse(courseDto, course);
-//        courseRepository.save(course);
-//        isUpdate = true;
-//        return isUpdate;
-//    }
-//
-//    public boolean deleteCourse(Long id) {
-//        boolean isDelete = false;
-//        Course course = courseRepository.findById(id).orElseThrow(
-//                () -> new ResourceNotFoundException("Course", "id", id.toString())
-//        );
-//        courseRepository.deleteById(id);
-//        isDelete = true;
-//        return isDelete;
-//    }
 }

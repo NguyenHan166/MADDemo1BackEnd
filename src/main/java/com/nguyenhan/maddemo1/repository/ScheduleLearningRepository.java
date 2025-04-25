@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.repository;
 
+import com.nguyenhan.maddemo1.constants.StateLesson;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.ScheduleLearning;
 import com.nguyenhan.maddemo1.model.User;
@@ -21,4 +22,6 @@ public interface ScheduleLearningRepository extends JpaRepository<ScheduleLearni
     List<ScheduleLearning> findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(
             User user, LocalDateTime startTime, LocalDateTime endTime
     );
+
+    List<ScheduleLearning> findByUserAndStateOrState(User user, StateLesson state, StateLesson state1);
 }

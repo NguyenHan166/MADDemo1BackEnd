@@ -355,7 +355,7 @@ public class CourseController {
             @RequestParam String state) {
         User user = userService.getAuthenticatedUser();
         List<CourseListOutputDto> courseDtosList = new ArrayList<>();
-        courseService.getCoursesByState(user, state).forEach(
+        courseService.getCoursesByState(user, StateCourse.valueOf(state)).forEach(
                 course -> {
                     CourseListOutputDto courseDto = courseMapper.mapToCourseListOutputDto(course, new CourseListOutputDto());
                     courseDtosList.add(courseDto);

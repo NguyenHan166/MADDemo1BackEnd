@@ -89,6 +89,7 @@ public class CourseMapper {
         courseListOutputDto.setCredits(course.getCredits());
         courseListOutputDto.setTimeStart(course.getTimeStart());
         courseListOutputDto.setTimeEnd(course.getTimeEnd());
+        courseListOutputDto.setRepeatType(course.getRepeatType());
         courseListOutputDto.setNumberOfAssignments(course.getNumberOfAssignments());
         courseListOutputDto.setNumberOfLessons(course.getNumberOfLessons());
         courseListOutputDto.setAddressLearning(course.getAddressLearning());

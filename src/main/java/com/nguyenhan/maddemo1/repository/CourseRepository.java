@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.repository;
 
+import com.nguyenhan.maddemo1.constants.StateCourse;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +18,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     // Truy vấn lấy các khóa học của người dùng sắp xếp theo thời gian bắt đầu
     List<Course> findByUserOrderByTimeStartAsc(User user);
     // Truy vấn lấy các khóa học có trạng thái
-    List<Course> findByUserAndState(User user ,String state);
+    List<Course> findByUserAndState(User user , StateCourse state);
+    List<Course> findByUserAndStateOrState(User user , StateCourse state , StateCourse course);
     // Truy vấn lấy các khóa học có thời gian bắt đầu và kết thúc nằm trong khoảng thời gian
     List<Course> findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(
             User user ,LocalDate startTime, LocalDate endTime);

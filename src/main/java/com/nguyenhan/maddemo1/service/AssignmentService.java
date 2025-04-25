@@ -1,19 +1,20 @@
 package com.nguyenhan.maddemo1.service;
 
+import com.nguyenhan.maddemo1.constants.NotificationCategory;
 import com.nguyenhan.maddemo1.constants.StateAssignment;
+import com.nguyenhan.maddemo1.constants.StateCourse;
+import com.nguyenhan.maddemo1.constants.StateNotification;
 import com.nguyenhan.maddemo1.dto.AssignmentDto;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
-import com.nguyenhan.maddemo1.model.Assignment;
-import com.nguyenhan.maddemo1.model.Course;
-import com.nguyenhan.maddemo1.model.ScheduleLearning;
-import com.nguyenhan.maddemo1.model.User;
-import com.nguyenhan.maddemo1.repository.AssignmentRepository;
-import com.nguyenhan.maddemo1.repository.CourseRepository;
-import com.nguyenhan.maddemo1.repository.ScheduleLearningRepository;
+import com.nguyenhan.maddemo1.model.*;
+import com.nguyenhan.maddemo1.repository.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,14 +26,16 @@ public class AssignmentService {
     private final CourseRepository courseRepository;
     private final UserService userService;
     private final AssignmentMapper assignmentMapper;
-    private final ScheduleLearningRepository scheduleLearningRepository;
+    private final UserRepository userRepository;
+    private final NotificationRepository notificationRepository;
 
-    public AssignmentService(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserService userService, AssignmentMapper assignmentMapper, ScheduleLearningRepository scheduleLearningRepository) {
+    public AssignmentService(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserService userService, AssignmentMapper assignmentMapper, UserRepository userRepository, NotificationRepository notificationRepository) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         this.userService = userService;
         this.assignmentMapper = assignmentMapper;
-        this.scheduleLearningRepository = scheduleLearningRepository;
+        this.userRepository = userRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     public List<Assignment> findAllByUser(User user) {
@@ -93,5 +96,34 @@ public class AssignmentService {
         log.atInfo().log("Deleted Assignment successfully");
         isDeleted = true;
         return isDeleted;
+    }
+
+    @Scheduled(fixedRate = 1800000) // 30p
+    public void updateStateAssignmentScheduleTask() {
+        log.info("Update Status Assignment Start");
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
+            List<Assignment> assignments = assignmentRepository.findByUserAndState(user, StateAssignment.INCOMPLETE);
+            for (Assignment assignment : assignments) {
+                if (LocalDateTime.now().isAfter(assignment.getTimeEnd())) {
+                    assignment.setState(StateAssignment.OVERDUE);
+                    Notification notification = new Notification();
+                    notification.setEventTime(assignment.getTimeEnd());
+                    notification.setName(String.format("Assignment %s is overdue", assignment.getName()));
+                    notification.setState(StateNotification.UNREAD);
+                    notification.setCategory(NotificationCategory.ASSIGNMENT);
+                    notification.setContent(String.format("Assignment %s is overdue at %s", assignment.getName(), assignment.getTimeEnd().toString()));
+                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                    notification.setEntityId(assignment.getId());
+                    notification.setUser(user);
+                    notificationRepository.save(notification);
+                }
+            }
+            assignmentRepository.saveAll(assignments);
+            log.info("Update Status Assignment End");
+        } else {
+            log.info("Please login to update Assignment schedule task");
+        }
     }
 }

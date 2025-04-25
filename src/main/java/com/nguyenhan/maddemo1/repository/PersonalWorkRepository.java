@@ -1,7 +1,9 @@
 package com.nguyenhan.maddemo1.repository;
 
+import com.nguyenhan.maddemo1.constants.StateAssignment;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.PersonalWork;
+import com.nguyenhan.maddemo1.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +19,5 @@ public interface PersonalWorkRepository extends JpaRepository<PersonalWork, Long
 //    void delete(PersonalWork entity);
 
     Optional<PersonalWork> findByName(String name);
+    List<PersonalWork> findByUserAndState(User user, StateAssignment state);
 }
