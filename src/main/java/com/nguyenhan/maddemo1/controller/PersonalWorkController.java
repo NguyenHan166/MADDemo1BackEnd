@@ -1,5 +1,8 @@
 package com.nguyenhan.maddemo1.controller;
+import com.nguyenhan.maddemo1.constants.NotificationCategory;
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
+import com.nguyenhan.maddemo1.constants.StateNotification;
+import com.nguyenhan.maddemo1.dto.NotificationDto;
 import com.nguyenhan.maddemo1.dto.PersonalWorkDto;
 import com.nguyenhan.maddemo1.dto.PersonalWorkUpdateDto;
 import com.nguyenhan.maddemo1.mapper.CourseMapper;
@@ -12,6 +15,7 @@ import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.PersonalWorkResponse;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.CourseService;
+import com.nguyenhan.maddemo1.service.NotificationService;
 import com.nguyenhan.maddemo1.service.PersonalWorkService;
 import com.nguyenhan.maddemo1.service.UserService;
 import jakarta.validation.Valid;
@@ -28,16 +32,16 @@ import java.util.List;
 @RestController
 public class PersonalWorkController {
 
-    private final PersonalWorkRepository personalWorkRepository;
     private final UserService userService;
     private final PersonalWorkService personalWorkService;
     private final PersonalWorkMapper personalWorkMapper;
+    private final NotificationService notificationService;
 
-    public PersonalWorkController(PersonalWorkRepository personalWorkRepository, CourseService courseService, UserService userService, CourseMapper courseMapper, UserService userService1, UserService userService2, PersonalWorkService personalWorkService, PersonalWorkMapper personalWorkMapper) {
-        this.personalWorkRepository = personalWorkRepository;
+    public PersonalWorkController(UserService userService, PersonalWorkService personalWorkService, PersonalWorkMapper personalWorkMapper, NotificationService notificationService) {
         this.userService = userService;
         this.personalWorkService = personalWorkService;
         this.personalWorkMapper = personalWorkMapper;
+        this.notificationService = notificationService;
     }
 
     @PostMapping("/create")
@@ -49,6 +53,18 @@ public class PersonalWorkController {
         log.info("Controller email: {}", user.getEmail());
 
         PersonalWork personalWork = personalWorkService.createPersonalWork(request);
+
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setName(String.format("Công việc %s chuẩn bị kết thúc", personalWork.getName()));
+        notificationDto.setTimeNoti(personalWork.getTimeEnd().minusDays(1));
+        notificationDto.setCategory(NotificationCategory.PERSONAL_WORK);
+        notificationDto.setContent(String.format("Công việc %s chuẩn bị kết thúc vào lúc %s tại %s", personalWork.getName(), personalWork.getTimeEnd(), personalWork.getWorkAddress()));
+        notificationDto.setEntityId(personalWork.getId());
+        notificationDto.setEventTime(personalWork.getTimeEnd());
+        notificationDto.setState(StateNotification.UNREAD);
+
+        notificationService.createNotification(notificationDto);
+
         request = personalWorkMapper.toPersonalWorkDto(personalWork);
         PersonalWorkResponse response = new PersonalWorkResponse();
         response.setPersonalWork(request);

@@ -1,8 +1,11 @@
 package com.nguyenhan.maddemo1.controller;
 
+import com.nguyenhan.maddemo1.constants.NotificationCategory;
 import com.nguyenhan.maddemo1.constants.ResponseConstants;
 import com.nguyenhan.maddemo1.constants.StateAssignment;
+import com.nguyenhan.maddemo1.constants.StateNotification;
 import com.nguyenhan.maddemo1.dto.AssignmentDto;
+import com.nguyenhan.maddemo1.dto.NotificationDto;
 import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
 import com.nguyenhan.maddemo1.model.Assignment;
 import com.nguyenhan.maddemo1.model.Course;
@@ -12,6 +15,7 @@ import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.AssignmentService;
 import com.nguyenhan.maddemo1.service.CourseService;
+import com.nguyenhan.maddemo1.service.NotificationService;
 import com.nguyenhan.maddemo1.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +32,14 @@ public class AssignmentController {
     private final UserService userService;
     private final CourseService courseService;
     private final AssignmentMapper assignmentMapper;
+    private final NotificationService notificationService;
 
-    public AssignmentController(AssignmentService assignmentService, UserService userService, AssignmentMapper assignmentMapper, CourseService courseService) {
+    public AssignmentController(AssignmentService assignmentService, UserService userService, AssignmentMapper assignmentMapper, CourseService courseService, NotificationService notificationService) {
         this.assignmentService = assignmentService;
         this.userService = userService;
         this.assignmentMapper = assignmentMapper;
         this.courseService = courseService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/")
@@ -81,6 +87,18 @@ public class AssignmentController {
             assignmentDto.setState(StateAssignment.INCOMPLETE);
         }
         Assignment assignment = assignmentService.create(assignmentDto);
+
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setName(String.format("Bài tập %s chuẩn bị kết thúc", assignment.getName()));
+        notificationDto.setTimeNoti(assignment.getTimeEnd().minusDays(1));
+        notificationDto.setCategory(NotificationCategory.ASSIGNMENT);
+        notificationDto.setContent(String.format("Bài tập %s chuẩn bị kết thúc vào lúc %s, nhanh làm bài đê !!!", assignment.getName(), assignment.getTimeEnd()));
+        notificationDto.setEntityId(assignment.getId());
+        notificationDto.setEventTime(assignment.getTimeEnd());
+        notificationDto.setState(StateNotification.UNREAD);
+
+        notificationService.createNotification(notificationDto);
+
         assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);
         AssignmentResponse response = new AssignmentResponse();
         response.setAssignment(assignmentDto);

@@ -78,6 +78,7 @@ public class PersonalWorkService {
         log.info(personalWork.toString());
 //        personalWorkRepository.delete(personalWork);
         personalWorkRepository.deleteById(id);
+        notificationRepository.deleteByEntityIdAndCategory(id, NotificationCategory.PERSONAL_WORK);
         log.info("PersonalWork with ID {} deleted successfully.", id);
         isDeleted = true;
         return isDeleted;
@@ -122,10 +123,10 @@ public class PersonalWorkService {
                     personalWork.setState(StateAssignment.OVERDUE);
                     Notification notification = new Notification();
                     notification.setEventTime(personalWork.getTimeEnd());
-                    notification.setName(String.format("Personal Work %s is overdue", personalWork.getName()));
+                    notification.setName(String.format("Công việc %s đã hết hạn", personalWork.getName()));
                     notification.setState(StateNotification.UNREAD);
                     notification.setCategory(NotificationCategory.PERSONAL_WORK);
-                    notification.setContent(String.format("Personal Work %s is overdue at %s", personalWork.getName(), personalWork.getTimeEnd().toString()));
+                    notification.setContent(String.format("Công việc %s đã hết hạn lúc %s", personalWork.getName(), personalWork.getTimeEnd().toString()));
                     notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
                     notification.setEntityId(personalWork.getId());
                     notification.setUser(user);

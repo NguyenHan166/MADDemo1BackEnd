@@ -23,5 +23,5 @@ public interface ScheduleLearningRepository extends JpaRepository<ScheduleLearni
             User user, LocalDateTime startTime, LocalDateTime endTime
     );
 
-    List<ScheduleLearning> findByUserAndStateOrState(User user, StateLesson state, StateLesson state1);
+    List<ScheduleLearning> findByUserAndState(User user, StateLesson state);
 }

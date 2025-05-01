@@ -2,7 +2,6 @@ package com.nguyenhan.maddemo1.service;
 
 import com.nguyenhan.maddemo1.constants.NotificationCategory;
 import com.nguyenhan.maddemo1.constants.StateAssignment;
-import com.nguyenhan.maddemo1.constants.StateCourse;
 import com.nguyenhan.maddemo1.constants.StateNotification;
 import com.nguyenhan.maddemo1.dto.AssignmentDto;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
@@ -93,6 +92,9 @@ public class AssignmentService {
 
         log.atInfo().log("Deleting Assignment");
         assignmentRepository.deleteById(id);
+
+        // xoá noti liên quan
+        notificationRepository.deleteByEntityIdAndCategory(assignment.getId(), NotificationCategory.ASSIGNMENT);
         log.atInfo().log("Deleted Assignment successfully");
         isDeleted = true;
         return isDeleted;
@@ -110,10 +112,10 @@ public class AssignmentService {
                     assignment.setState(StateAssignment.OVERDUE);
                     Notification notification = new Notification();
                     notification.setEventTime(assignment.getTimeEnd());
-                    notification.setName(String.format("Assignment %s is overdue", assignment.getName()));
+                    notification.setName(String.format("Bài tập %s đã hết hạn", assignment.getName()));
                     notification.setState(StateNotification.UNREAD);
                     notification.setCategory(NotificationCategory.ASSIGNMENT);
-                    notification.setContent(String.format("Assignment %s is overdue at %s", assignment.getName(), assignment.getTimeEnd().toString()));
+                    notification.setContent(String.format("Bài tập %s đã hết hạn lúc %s", assignment.getName(), assignment.getTimeEnd().toString()));
                     notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
                     notification.setEntityId(assignment.getId());
                     notification.setUser(user);

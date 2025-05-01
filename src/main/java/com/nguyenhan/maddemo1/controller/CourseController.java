@@ -1,25 +1,20 @@
 package com.nguyenhan.maddemo1.controller;
 
 import com.nguyenhan.maddemo1.constants.*;
-import com.nguyenhan.maddemo1.dto.CourseDetailsDto;
-import com.nguyenhan.maddemo1.dto.CourseInputDto;
-import com.nguyenhan.maddemo1.dto.CourseListOutputDto;
-import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
+import com.nguyenhan.maddemo1.dto.*;
 import com.nguyenhan.maddemo1.mapper.CourseMapper;
 import com.nguyenhan.maddemo1.mapper.ScheduleLearningMapper;
 import com.nguyenhan.maddemo1.model.Course;
+import com.nguyenhan.maddemo1.model.Notification;
 import com.nguyenhan.maddemo1.model.ScheduleLearning;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.responses.CourseResponse;
 import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.service.CourseService;
+import com.nguyenhan.maddemo1.service.NotificationService;
 import com.nguyenhan.maddemo1.service.UserService;
-import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
@@ -29,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.swing.plaf.nimbus.State;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -50,12 +44,15 @@ public class CourseController {
     private final CourseService courseService;
     private final CourseMapper courseMapper;
     private final ScheduleLearningMapper scheduleLearningMapper;
+    private final NotificationService notificationService;
 
-    public CourseController(CourseService courseService, UserService userService, CourseMapper courseMapper, ScheduleLearningMapper scheduleLearningMapper) {
+    public CourseController(CourseService courseService, UserService userService, CourseMapper courseMapper, ScheduleLearningMapper scheduleLearningMapper, NotificationService notificationService
+    ) {
         this.courseService = courseService;
         this.userService = userService;
         this.courseMapper = courseMapper;
         this.scheduleLearningMapper = scheduleLearningMapper;
+        this.notificationService = notificationService;
     }
 
     @InitBinder
@@ -84,7 +81,21 @@ public class CourseController {
             ));
         }
 
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setName(String.format("Khóa học %s chuẩn bị kết thúc", course.getName()));
+        notificationDto.setTimeNoti(course.getTimeEnd().atStartOfDay().minusDays(1));
+        notificationDto.setCategory(NotificationCategory.COURSE);
+        notificationDto.setContent(String.format("Khóa học %s chuẩn bị kết thúc vào lúc %s", course.getName(), course.getTimeEnd()));
+        notificationDto.setEntityId(course.getId());
+        notificationDto.setEventTime(course.getTimeEnd().atStartOfDay());
+        notificationDto.setState(StateNotification.UNREAD);
+
+        notificationService.createNotification(notificationDto);
+
+        createNotificationForLesson(course.getScheduleLearnings());
+
         CourseResponse response = new CourseResponse();
+
         response.setCourse(courseMapper.mapToCourseDto(course, new CourseDetailsDto()));
         return ResponseEntity.status(ResponseConstants.STATUS_201).body(response);
     }
@@ -206,6 +217,7 @@ public class CourseController {
 
             startDateTime = startDateTime.plusDays(1);
         }
+
         Course course = courseService.createCourse(courseDto);
         setStateCourse(courseDto, course);
         course.setNumberOfLessons(Integer.toString(scheduleLearnings.size()));
@@ -273,6 +285,25 @@ public class CourseController {
             nextDay = nextDay.plusDays(1);
         }
         return nextDay;
+    }
+
+    private void createNotificationForLesson(List<ScheduleLearning> scheduleLearnings) {
+        List<NotificationDto> notificationDtos = new ArrayList<>();
+        scheduleLearnings.forEach(
+                scheduleLearning -> {
+                    NotificationDto notificationDto = new NotificationDto();
+                    notificationDto.setName(String.format("Buổi học %s chuẩn bị diễn ra", scheduleLearning.getName()));
+                    notificationDto.setTimeNoti(scheduleLearning.getTimeStart().minusMinutes(30));
+                    notificationDto.setCategory(NotificationCategory.COURSE);
+                    notificationDto.setContent(String.format("Buổi học %s chuẩn bị diễn ra vào lúc %s tại %s", scheduleLearning.getName(), scheduleLearning.getTimeStart(), scheduleLearning.getLearningAddresses()));
+                    notificationDto.setEntityId(scheduleLearning.getId());
+                    notificationDto.setEventTime(scheduleLearning.getTimeStart());
+                    notificationDto.setState(StateNotification.UNREAD);
+                    notificationDtos.add(notificationDto);
+                }
+        );
+
+        notificationService.createNotifications(notificationDtos);
     }
 
     private void setStateCourse(CourseInputDto courseDto, Course course) {

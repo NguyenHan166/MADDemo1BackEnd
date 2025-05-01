@@ -122,6 +122,10 @@ public class ScheduleLearningService {
         boolean isDeleted = false;
         ScheduleLearning scheduleLearning = fetchScheduleLearning(scheduleLearningID);
         scheduleLearningRepository.deleteById(scheduleLearningID);
+
+        // xóa noti liên quan
+        notificationRepository.deleteByEntityIdAndCategory(scheduleLearningID, NotificationCategory.LESSON);
+
         isDeleted = true;
         return isDeleted;
     }
@@ -136,16 +140,16 @@ public class ScheduleLearningService {
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-            List<ScheduleLearning> scheduleLearnings = scheduleLearningRepository.findByUserAndStateOrState(user, StateLesson.NOT_YET, StateLesson.ABSENT);
+            List<ScheduleLearning> scheduleLearnings = scheduleLearningRepository.findByUserAndState(user, StateLesson.NOT_YET);
             for (ScheduleLearning scheduleLearning : scheduleLearnings) {
                 if (LocalDateTime.now().isAfter(scheduleLearning.getTimeEnd())) {
                     scheduleLearning.setState(StateLesson.ABSENT);
                     Notification notification = new Notification();
                     notification.setEventTime(scheduleLearning.getTimeStart());
-                    notification.setName(String.format("Lesson %s is overdue", scheduleLearning.getName()));
+                    notification.setName(String.format("Buổi học %s chưa điểm danh", scheduleLearning.getName()));
                     notification.setState(StateNotification.UNREAD);
                     notification.setCategory(NotificationCategory.LESSON);
-                    notification.setContent(String.format("Lesson %s is end at %s and you absent", scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
+                    notification.setContent(String.format("Buổi học %s đã kết thúc lúc %s và bạn chưa điểm danh", scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
                     notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
                     notification.setEntityId(scheduleLearning.getId());
                     notification.setUser(user);

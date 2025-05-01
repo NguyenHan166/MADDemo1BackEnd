@@ -124,6 +124,15 @@ public class CourseService {
                 () -> new ResourceNotFoundException("Course", "id", id.toString())
         );
         courseRepository.deleteById(id);
+
+        // Xóa noti liên quan
+        notificationRepository.deleteByEntityIdAndCategory(id, NotificationCategory.COURSE);
+        course.getScheduleLearnings().forEach(
+                lesson -> {
+                    notificationRepository.deleteByEntityIdAndCategory(lesson.getId(), NotificationCategory.LESSON);
+                }
+        );
+
         isDelete = true;
         return isDelete;
     }
@@ -144,10 +153,10 @@ public class CourseService {
                     course.setState(StateCourse.END);
                     Notification notification = new Notification();
                     notification.setEventTime(course.getTimeStart().atStartOfDay());
-                    notification.setName(String.format("Course %s is overdue", course.getName()));
+                    notification.setName(String.format("Khóa học %s đã kết thúc", course.getName()));
                     notification.setState(StateNotification.UNREAD);
                     notification.setCategory(NotificationCategory.COURSE);
-                    notification.setContent(String.format("Course %s is overdue at %s", course.getName(), course.getTimeEnd().toString()));
+                    notification.setContent(String.format("Khóa học %s đã kết thúc lúc %s", course.getName(), course.getTimeEnd().toString()));
                     notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
                     notification.setEntityId(course.getId());
                     notification.setUser(user);

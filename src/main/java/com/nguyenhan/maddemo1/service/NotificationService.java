@@ -9,6 +9,7 @@ import com.nguyenhan.maddemo1.repository.NotificationRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -39,6 +40,14 @@ public class NotificationService {
         Notification notification = new Notification();
         notificationMapper.mapToNotification(notificationDto, notification);
         return notificationRepository.save(notification);
+    }
+
+    public List<Notification> createNotifications(List<NotificationDto> notificationDtos) {
+        List<Notification> notifications = new ArrayList<>();
+        notificationDtos.forEach(notificationDto -> {
+            notifications.add(notificationMapper.mapToNotification(notificationDto, new Notification()));
+        });
+        return notificationRepository.saveAll(notifications);
     }
 
     public boolean updateNotification(Long id, NotificationDto notificationDto) {

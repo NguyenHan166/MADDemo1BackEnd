@@ -1,8 +1,7 @@
 package com.nguyenhan.maddemo1.controller;
 
-import com.nguyenhan.maddemo1.constants.ResponseConstants;
-import com.nguyenhan.maddemo1.constants.StateLesson;
-import com.nguyenhan.maddemo1.constants.StateScheduleLearning;
+import com.nguyenhan.maddemo1.constants.*;
+import com.nguyenhan.maddemo1.dto.NotificationDto;
 import com.nguyenhan.maddemo1.dto.ScheduleLearningDto;
 import com.nguyenhan.maddemo1.mapper.ScheduleLearningMapper;
 import com.nguyenhan.maddemo1.model.Course;
@@ -12,6 +11,7 @@ import com.nguyenhan.maddemo1.responses.ErrorResponseDto;
 import com.nguyenhan.maddemo1.responses.ResponseDto;
 import com.nguyenhan.maddemo1.responses.ScheduleResponse;
 import com.nguyenhan.maddemo1.service.CourseService;
+import com.nguyenhan.maddemo1.service.NotificationService;
 import com.nguyenhan.maddemo1.service.ScheduleLearningService;
 import com.nguyenhan.maddemo1.service.UserService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -30,12 +30,14 @@ public class ScheduleLearningController {
     private final ScheduleLearningMapper scheduleLearningMapper;
     private final UserService userService;
     private final CourseService courseService;
+    private final NotificationService notificationService;
 
-    public ScheduleLearningController(ScheduleLearningService scheduleLearningService, ScheduleLearningMapper scheduleLearningMapper, UserService userService, CourseService courseService) {
+    public ScheduleLearningController(ScheduleLearningService scheduleLearningService, ScheduleLearningMapper scheduleLearningMapper, UserService userService, CourseService courseService, NotificationService notificationService) {
         this.scheduleLearningService = scheduleLearningService;
         this.scheduleLearningMapper = scheduleLearningMapper;
         this.userService = userService;
         this.courseService = courseService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/fetch")
@@ -82,6 +84,18 @@ public class ScheduleLearningController {
             dto.setState(StateLesson.PRESENT);
         }
         ScheduleLearning scheduleLearning = scheduleLearningService.createScheduleLearning(dto);
+
+        NotificationDto notificationDto = new NotificationDto();
+        notificationDto.setName(String.format("Buổi học %s chuẩn bị diễn ra", scheduleLearning.getName()));
+        notificationDto.setTimeNoti(scheduleLearning.getTimeEnd().minusHours(30));
+        notificationDto.setCategory(NotificationCategory.LESSON);
+        notificationDto.setContent(String.format("Buổi học %s chuẩn bị diễ ra vào lúc %s tại %s", scheduleLearning.getName(), scheduleLearning.getTimeEnd(), scheduleLearning.getLearningAddresses()));
+        notificationDto.setEntityId(scheduleLearning.getId());
+        notificationDto.setEventTime(scheduleLearning.getTimeEnd());
+        notificationDto.setState(StateNotification.UNREAD);
+        notificationService.createNotification(notificationDto);
+
+
         scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, dto);
         ScheduleResponse response = new ScheduleResponse();
         response.setScheduleLearning(dto);
