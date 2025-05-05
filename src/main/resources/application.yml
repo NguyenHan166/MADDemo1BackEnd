@@ -6,7 +6,7 @@ security:
 spring:
   mail:
     host: smtp.gmail.com
-    username: "quangteo3k@gmail.com"
+    username: ${SUPPORT_EMAIL}
     port: '587'
     properties:
       mail:
@@ -14,7 +14,7 @@ spring:
           starttls:
             enable: 'true'
           auth: 'true'
-    password: "putp cigr ngrf nyko"
+    password: ${APP_PASSWORD}
   config:
     import: optional:file:.env[.properties]
   #  application:
