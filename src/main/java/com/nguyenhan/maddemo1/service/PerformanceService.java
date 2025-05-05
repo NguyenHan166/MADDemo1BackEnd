@@ -45,6 +45,7 @@ public class PerformanceService {
 
 
     public PerformanceDto getAllPerformance(PerformanceDto request){
+
         User user = getCurrentUser();
         PerformanceDto response = new PerformanceDto();
 
@@ -64,6 +65,10 @@ public class PerformanceService {
                 absentCount++;
             }
         }
+
+//        log.info("CheduleS: {}", scheduleLearningList.size());
+//        log.info("Present: {}", presentCount);
+//        log.info("Absent: {}", absentCount);
 
         response.setPresent(presentCount);
         response.setAbsent(absentCount);

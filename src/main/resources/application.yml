@@ -1,11 +1,12 @@
 security:
   jwt:
-    secret-key: ${JWT_SECRET_KEY}
-    expiration-time: '2592000000'
+    secret-key: "ZWw0pv2laQ8pgA6Nu/avl5+IPsmces+A2Ph6xYcpgPb7eCrzHkIf6ILRVBHMRaro
+    "
+    expiration-time: '3600000'
 spring:
   mail:
     host: smtp.gmail.com
-    username: ${SUPPORT_EMAIL}
+    username: "quangteo3k@gmail.com"
     port: '587'
     properties:
       mail:
@@ -13,34 +14,34 @@ spring:
           starttls:
             enable: 'true'
           auth: 'true'
-    password: ${APP_PASSWORD}
+    password: "putp cigr ngrf nyko"
   config:
     import: optional:file:.env[.properties]
-#  application:
-#    name: MADDemo1
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          google:
-#            redirect-uri: http://localhost:8080/login/oauth2/code/google
-#            client-secret: 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
-#            client-id: 56330466237-a6mhq0bt60d0d2r46ulhjpij6pbm42lv.apps.googleusercontent.com
-#            scope: profile, email
-#        provider:
-#          google:
-#            authorization-uri: https://accounts.google.com/o/oauth2/auth
-#            token-uri: https://oauth2.googleapis.com/token
-#            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+  #  application:
+  #    name: MADDemo1
+  #  security:
+  #    oauth2:
+  #      client:
+  #        registration:
+  #          google:
+  #            redirect-uri: http://localhost:8080/login/oauth2/code/google
+  #            client-secret: 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
+  #            client-id: 56330466237-a6mhq0bt60d0d2r46ulhjpij6pbm42lv.apps.googleusercontent.com
+  #            scope: profile, email
+  #        provider:
+  #          google:
+  #            authorization-uri: https://accounts.google.com/o/oauth2/auth
+  #            token-uri: https://oauth2.googleapis.com/token
+  #            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: 'true'
   datasource:
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    password: "root"
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${SPRING_DATASOURCE_USERNAME}
-    url: ${SPRING_DATASOURCE_URL}
+    username: "root"
+    url: "jdbc:mysql://localhost:3306/edu_schedule"
   data:
     jpa:
       repositories:

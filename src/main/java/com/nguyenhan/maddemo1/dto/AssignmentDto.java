@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.nguyenhan.maddemo1.constants.StateAssignment;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

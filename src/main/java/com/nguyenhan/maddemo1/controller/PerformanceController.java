@@ -33,6 +33,7 @@ public class PerformanceController {
 
     @PostMapping("/getAllPerformance")
     public ResponseEntity<PerformanceDto> getPerformance(@RequestBody PerformanceDto performanceDto){
+        log.info("Performance controller");
         return ResponseEntity.status(ResponseConstants.STATUS_200).body(performanceService.getAllPerformance(performanceDto));
     }
 }
