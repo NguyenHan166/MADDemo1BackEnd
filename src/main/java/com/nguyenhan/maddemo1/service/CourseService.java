@@ -13,6 +13,7 @@ import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.NotificationRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +38,15 @@ public class CourseService {
     private final CourseMapper courseMapper;
     private final UserService userService;
     private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
-    public CourseService(CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper, UserService userService, NotificationRepository notificationRepository) {
+    public CourseService(CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper, UserService userService, NotificationRepository notificationRepository, EmailService emailService) {
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
         this.courseMapper = courseMapper;
         this.userService = userService;
         this.notificationRepository = notificationRepository;
+        this.emailService = emailService;
     }
 
     public List<Course> listCourses() {
@@ -161,6 +164,12 @@ public class CourseService {
                     notification.setEntityId(course.getId());
                     notification.setUser(user);
                     notificationRepository.save(notification);
+
+                    try {
+                        emailService.sendNotificationEmail(email,notification, user);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
                 } else if (LocalDate.now().isAfter(course.getTimeStart()) && LocalDate.now().isBefore(course.getTimeEnd())) {
                     course.setState(StateCourse.ONGOING);
                 }
@@ -170,5 +179,6 @@ public class CourseService {
         } else {
             log.info("Please login to update course schedule task");
         }
+
     }
 }

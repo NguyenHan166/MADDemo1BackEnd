@@ -7,6 +7,7 @@ import com.nguyenhan.maddemo1.dto.UserDto;
 import com.nguyenhan.maddemo1.dto.VerifyUserDto;
 import com.nguyenhan.maddemo1.exception.*;
 import com.nguyenhan.maddemo1.mapper.UsersMapper;
+import com.nguyenhan.maddemo1.model.Notification;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.UserRepository;
 import jakarta.mail.MessagingException;
@@ -192,9 +193,9 @@ public class AuthenticationService {
         } else if (event.equals("ChangePassword")) {
             sendVerificationEmailChangePassword(email, verifyCode);
         }
-
         return verifyUserDto;
     }
+
 
     private void sendVerificationEmail(String email, String verifyCode) { //TODO: Update with company logo
         String subject = "Account Verification";
