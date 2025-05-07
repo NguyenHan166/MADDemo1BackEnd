@@ -30,6 +30,7 @@ public class CourseResponseDto {
     private Review review_ass;
 
     private int percent_review_all;
+    private String text_review;
     private int totalScheduleLearning;
     private int totalScheduleLearningCurrent;
     private int scheduleLearning_present;

@@ -4,6 +4,7 @@ import com.nguyenhan.maddemo1.config.PersonalWorkSecurity;
 import com.nguyenhan.maddemo1.constants.Review;
 import com.nguyenhan.maddemo1.constants.StateAssignment;
 import com.nguyenhan.maddemo1.constants.StateLesson;
+import com.nguyenhan.maddemo1.constants.TextReview;
 import com.nguyenhan.maddemo1.dto.CourseResponseDto;
 import com.nguyenhan.maddemo1.dto.PerformanceDto;
 import com.nguyenhan.maddemo1.mapper.CourseMapper;
@@ -78,8 +79,10 @@ public class PerformanceService {
 
         List<Course> courseList = courseRepository.findByUserId(userId);
         List<CourseResponseDto> courseResponseDtoList = new ArrayList<>();
+
         for(Course c : courseList){
             CourseResponseDto courseResponseDto = courseMapper.mapToCourseResponseDto(c);
+
             courseResponseDto.setReview_sche(calculateReview_sche(c));
             courseResponseDto.setTotalScheduleLearning(c.getScheduleLearnings().size());
             courseResponseDto.setTotalScheduleLearningCurrent(calculateTotalScheduleLearningCurrent(c));
@@ -90,12 +93,53 @@ public class PerformanceService {
             courseResponseDto.setAssignment_overdue(calculateAssignment_overdue(c));
             courseResponseDto.setReview_ass(calculateReview_ass(courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
             courseResponseDto.setPercent_review_all(calculatePercent_review_all(courseResponseDto.getScheduleLearning_present(), courseResponseDto.getTotalScheduleLearningCurrent(), courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
+            courseResponseDto.setText_review(evaluateTextReview(courseResponseDto.getScheduleLearning_present(), courseResponseDto.getTotalScheduleLearningCurrent(), courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
 
             courseResponseDtoList.add(courseResponseDto);
         }
         response.setCourseResponseDtoList(courseResponseDtoList);
         return response;
     }
+
+    public String evaluateTextReview(int present, int totalSchedule, int assignmentOverdue, int assignmentTotalCurrent) {
+        // Nếu chưa có dữ liệu thì trả về đánh giá tốt
+        if (totalSchedule == 0 && assignmentTotalCurrent == 0) {
+            return TextReview.EXCELLENT.getDisplayName();
+        }
+
+        double attendancePercent = totalSchedule > 0 ? (double) present / totalSchedule * 100 : 100;
+        double assignmentPercent = assignmentTotalCurrent > 0 ? (double) (assignmentTotalCurrent - assignmentOverdue) / assignmentTotalCurrent * 100 : 100;
+
+        double average = (attendancePercent + assignmentPercent) / 2;
+
+        if (average >= 90) {
+            return TextReview.EXCELLENT.getDisplayName();
+        }
+
+        if (attendancePercent < 70 && assignmentPercent < 60) {
+            return TextReview.ABSENT_ASSIGNMENT_FAIL.getDisplayName();
+        }
+
+        if (attendancePercent < 70 && assignmentPercent >= 60) {
+            return TextReview.ABSENT_FAIL.getDisplayName();
+        }
+
+        if (attendancePercent >= 70 && attendancePercent < 80 && assignmentPercent < 60) {
+            return TextReview.ABSENT_ASSIGNMENT_WARNING.getDisplayName();
+        }
+
+        if (attendancePercent >= 70 && attendancePercent < 80 && assignmentPercent >= 60) {
+            return TextReview.ABSENT_WARNING.getDisplayName();
+        }
+
+        if (attendancePercent >= 80 && assignmentPercent < 60) {
+            return TextReview.ASSIGNMENT_WARNING.getDisplayName();
+        }
+
+        return TextReview.GOOD.getDisplayName();
+    }
+
+
 
     public int calculateTotalAssignmentCurrent( Course course){
         int count = 0;
