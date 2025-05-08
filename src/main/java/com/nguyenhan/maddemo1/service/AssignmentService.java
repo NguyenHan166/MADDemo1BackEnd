@@ -8,6 +8,7 @@ import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
 import com.nguyenhan.maddemo1.model.*;
 import com.nguyenhan.maddemo1.repository.*;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,14 +28,17 @@ public class AssignmentService {
     private final AssignmentMapper assignmentMapper;
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
-    public AssignmentService(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserService userService, AssignmentMapper assignmentMapper, UserRepository userRepository, NotificationRepository notificationRepository) {
+    public AssignmentService(AssignmentRepository assignmentRepository, CourseRepository courseRepository, UserService userService,
+                             AssignmentMapper assignmentMapper, UserRepository userRepository, NotificationRepository notificationRepository, EmailService emailService) {
         this.assignmentRepository = assignmentRepository;
         this.courseRepository = courseRepository;
         this.userService = userService;
         this.assignmentMapper = assignmentMapper;
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
+        this.emailService = emailService;
     }
 
     public List<Assignment> findAllByUser(User user) {
@@ -120,6 +124,12 @@ public class AssignmentService {
                     notification.setEntityId(assignment.getId());
                     notification.setUser(user);
                     notificationRepository.save(notification);
+
+                    try {
+                        emailService.sendNotificationEmail(email,notification, user);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
             assignmentRepository.saveAll(assignments);

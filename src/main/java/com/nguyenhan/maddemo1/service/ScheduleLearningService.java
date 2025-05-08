@@ -13,6 +13,7 @@ import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.NotificationRepository;
 import com.nguyenhan.maddemo1.repository.ScheduleLearningRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -32,14 +33,18 @@ public class ScheduleLearningService {
     private final ScheduleLearningMapper scheduleLearningMapper;
     private final UserService userService;
     private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
-    public ScheduleLearningService(ScheduleLearningRepository scheduleLearningRepository, UserRepository userRepository, CourseRepository courseRepository, ScheduleLearningMapper scheduleLearningMapper, UserService userService, NotificationRepository notificationRepository) {
+    public ScheduleLearningService(ScheduleLearningRepository scheduleLearningRepository, UserRepository userRepository,
+                                   CourseRepository courseRepository, ScheduleLearningMapper scheduleLearningMapper,
+                                   UserService userService, NotificationRepository notificationRepository, EmailService emailService) {
         this.scheduleLearningRepository = scheduleLearningRepository;
         this.userRepository = userRepository;
         this.courseRepository = courseRepository;
         this.scheduleLearningMapper = scheduleLearningMapper;
         this.userService = userService;
         this.notificationRepository = notificationRepository;
+        this.emailService = emailService;
     }
 
     public List<ScheduleLearning> findAll() {
@@ -67,7 +72,8 @@ public class ScheduleLearningService {
             );
 
             for (ScheduleLearning scheduleLearning1 : course.getScheduleLearnings()){
-                if (scheduleLearning1.getTimeStart().equals(scheduleLearningDto.getTimeStart()) || scheduleLearning1.getTimeEnd().equals(scheduleLearningDto.getTimeEnd())){
+                if (scheduleLearning1.getTimeStart().equals(scheduleLearningDto.getTimeStart())
+                        || scheduleLearning1.getTimeEnd().equals(scheduleLearningDto.getTimeEnd())){
                     throw new ResourceAlreadyExistsException("ScheduleLearning", "scheduleLearningTime" , scheduleLearningDto.getTimeStart().toString());
                 }
             }
@@ -149,11 +155,18 @@ public class ScheduleLearningService {
                     notification.setName(String.format("Buổi học %s chưa điểm danh", scheduleLearning.getName()));
                     notification.setState(StateNotification.UNREAD);
                     notification.setCategory(NotificationCategory.LESSON);
-                    notification.setContent(String.format("Buổi học %s đã kết thúc lúc %s và bạn chưa điểm danh", scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
+                    notification.setContent(String.format("Buổi học %s đã kết thúc lúc %s và bạn chưa điểm danh",
+                            scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
                     notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
                     notification.setEntityId(scheduleLearning.getId());
                     notification.setUser(user);
                     notificationRepository.save(notification);
+
+                    try {
+                        emailService.sendNotificationEmail(email,notification, user);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
             scheduleLearningRepository.saveAll(scheduleLearnings);

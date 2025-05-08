@@ -14,6 +14,7 @@ import com.nguyenhan.maddemo1.repository.CourseRepository;
 import com.nguyenhan.maddemo1.repository.NotificationRepository;
 import com.nguyenhan.maddemo1.repository.PersonalWorkRepository;
 import com.nguyenhan.maddemo1.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -36,12 +37,15 @@ public class PersonalWorkService {
     private final UserRepository userRepository;
     private final PersonalWorkMapper personalWorkMapper;
     private final NotificationRepository notificationRepository;
+    private final EmailService emailService;
 
-    public PersonalWorkService(PersonalWorkRepository personalWorkRepository, UserRepository userRepository, PersonalWorkMapper personalWorkMapper, NotificationRepository notificationRepository) {
+    public PersonalWorkService(PersonalWorkRepository personalWorkRepository, UserRepository userRepository,
+                               PersonalWorkMapper personalWorkMapper, NotificationRepository notificationRepository, EmailService emailService) {
         this.personalWorkRepository = personalWorkRepository;
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.personalWorkMapper = personalWorkMapper;
+        this.emailService = emailService;
     }
 
 
@@ -131,6 +135,12 @@ public class PersonalWorkService {
                     notification.setEntityId(personalWork.getId());
                     notification.setUser(user);
                     notificationRepository.save(notification);
+
+                    try {
+                        emailService.sendNotificationEmail(email,notification, user);
+                    } catch (MessagingException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
             personalWorkRepository.saveAll(personalWorks);

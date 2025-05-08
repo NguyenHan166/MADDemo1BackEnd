@@ -1,12 +1,11 @@
 security:
   jwt:
-    secret-key: "ZWw0pv2laQ8pgA6Nu/avl5+IPsmces+A2Ph6xYcpgPb7eCrzHkIf6ILRVBHMRaro
-    "
-    expiration-time: '3600000'
+    secret-key: ${JWT_SECRET_KEY}
+    expiration-time: '2592000000'
 spring:
   mail:
     host: smtp.gmail.com
-    username: "quangteo3k@gmail.com"
+    username: ${SUPPORT_EMAIL}
     port: '587'
     properties:
       mail:
@@ -14,7 +13,7 @@ spring:
           starttls:
             enable: 'true'
           auth: 'true'
-    password: "putp cigr ngrf nyko"
+    password: ${APP_PASSWORD}
   config:
     import: optional:file:.env[.properties]
   #  application:
@@ -38,10 +37,10 @@ spring:
       ddl-auto: update
     show-sql: 'true'
   datasource:
-    password: "root"
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: "root"
-    url: "jdbc:mysql://localhost:3306/edu_schedule"
+    username: ${SPRING_DATASOURCE_USERNAME}
+    url: ${SPRING_DATASOURCE_URL}
   data:
     jpa:
       repositories:
