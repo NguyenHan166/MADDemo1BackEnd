@@ -9,6 +9,7 @@ import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
 import com.nguyenhan.maddemo1.model.*;
 import com.nguyenhan.maddemo1.repository.*;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -51,13 +52,13 @@ public class AssignmentService {
 
     public Assignment findById(Long id) {
         return assignmentRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Assignment" , "Id" , id.toString())
+                () -> new ResourceNotFoundException("Assignment", "Id", id.toString())
         );
     }
 
     public Assignment create(AssignmentDto assignmentDto) {
         Course course = courseRepository.findById(assignmentDto.getCourseId()).orElseThrow(
-                () -> new ResourceNotFoundException("Course" , "Id" , assignmentDto.getCourseId().toString())
+                () -> new ResourceNotFoundException("Course", "Id", assignmentDto.getCourseId().toString())
         );
 
         User user = userService.getAuthenticatedUser();
@@ -67,18 +68,18 @@ public class AssignmentService {
         return assignmentRepository.save(assignment);
     }
 
-    public boolean update(Long id ,AssignmentDto assignmentDto) {
+    public boolean update(Long id, AssignmentDto assignmentDto) {
         boolean isUpdated = false;
         Assignment assignment = assignmentRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Assignment" , "Id" , id.toString())
+                () -> new ResourceNotFoundException("Assignment", "Id", id.toString())
         );
 
         Course course = courseRepository.findById(assignmentDto.getCourseId()).orElseThrow(
-                () -> new ResourceNotFoundException("Course" , "Id" , id.toString())
+                () -> new ResourceNotFoundException("Course", "Id", id.toString())
         );
 
         if (!course.getAssignments().contains(assignment)) {
-            throw new ResourceNotFoundException("Assignment in course" , "Id" , id.toString());
+            throw new ResourceNotFoundException("Assignment in course", "Id", id.toString());
         }
 
         assignmentMapper.mapToAssignment(assignmentDto, assignment);
@@ -88,10 +89,11 @@ public class AssignmentService {
         return isUpdated;
     }
 
+    @Transactional
     public boolean delete(Long id) {
         boolean isDeleted = false;
         Assignment assignment = assignmentRepository.findById(id).orElseThrow(
-                () -> new ResourceNotFoundException("Assignment" , "Id" , id.toString())
+                () -> new ResourceNotFoundException("Assignment", "Id", id.toString())
         );
 
         log.atInfo().log("Deleting Assignment");
@@ -104,38 +106,33 @@ public class AssignmentService {
         return isDeleted;
     }
 
-    @Scheduled(fixedRate = 1800000) // 30p
+    @Scheduled(fixedRate = 300000) // 5p
     public void updateStateAssignmentScheduleTask() {
         log.info("Update Status Assignment Start");
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-            List<Assignment> assignments = assignmentRepository.findByUserAndState(user, StateAssignment.INCOMPLETE);
-            for (Assignment assignment : assignments) {
-                if (LocalDateTime.now().isAfter(assignment.getTimeEnd())) {
-                    assignment.setState(StateAssignment.OVERDUE);
-                    Notification notification = new Notification();
-                    notification.setEventTime(assignment.getTimeEnd());
-                    notification.setName(String.format("Bài tập %s đã hết hạn", assignment.getName()));
-                    notification.setState(StateNotification.UNREAD);
-                    notification.setCategory(NotificationCategory.ASSIGNMENT);
-                    notification.setContent(String.format("Bài tập %s đã hết hạn lúc %s", assignment.getName(), assignment.getTimeEnd().toString()));
-                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
-                    notification.setEntityId(assignment.getId());
-                    notification.setUser(user);
-                    notificationRepository.save(notification);
+        List<Assignment> assignments = assignmentRepository.findByState(StateAssignment.INCOMPLETE);
+        for (Assignment assignment : assignments) {
+            if (LocalDateTime.now().isAfter(assignment.getTimeEnd())) {
+                assignment.setState(StateAssignment.OVERDUE);
+                Notification notification = new Notification();
+                notification.setEventTime(assignment.getTimeEnd());
+                notification.setName(String.format("Bài tập %s đã hết hạn", assignment.getName()));
+                notification.setState(StateNotification.UNREAD);
+                notification.setCategory(NotificationCategory.ASSIGNMENT);
+                notification.setContent(String.format("Bài tập %s đã hết hạn lúc %s", assignment.getName(), assignment.getTimeEnd().toString()));
+                notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                notification.setEntityId(assignment.getId());
+                notification.setUser(assignment.getUser());
+                notificationRepository.save(notification);
 
-                    try {
-                        emailService.sendNotificationEmail(email,notification, user);
-                    } catch (MessagingException e) {
-                        throw new RuntimeException(e);
-                    }
+                try {
+                    emailService.sendNotificationEmail(assignment.getUser().getEmail(), notification, assignment.getUser());
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
                 }
             }
-            assignmentRepository.saveAll(assignments);
-            log.info("Update Status Assignment End");
-        } else {
-            log.info("Please login to update Assignment schedule task");
         }
+        assignmentRepository.saveAll(assignments);
+        log.info("Update Status Assignment End");
+
     }
 }

@@ -144,41 +144,36 @@ public class CourseService {
         return courseRepository.save(course);
     }
 
-    @Scheduled(fixedRate = 1800000)
+    @Scheduled(fixedRate = 300000)
     public void updateStateCourseScheduleTask() {
         log.info("Update Status Course Start");
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-            List<Course> courses = courseRepository.findByUserAndStateOrState(user, StateCourse.NOT_YET, StateCourse.ONGOING);
-            for (Course course : courses) {
-                if (LocalDate.now().isAfter(course.getTimeEnd())) {
-                    course.setState(StateCourse.END);
-                    Notification notification = new Notification();
-                    notification.setEventTime(course.getTimeStart().atStartOfDay());
-                    notification.setName(String.format("Khóa học %s đã kết thúc", course.getName()));
-                    notification.setState(StateNotification.UNREAD);
-                    notification.setCategory(NotificationCategory.COURSE);
-                    notification.setContent(String.format("Khóa học %s đã kết thúc lúc %s", course.getName(), course.getTimeEnd().toString()));
-                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
-                    notification.setEntityId(course.getId());
-                    notification.setUser(user);
-                    notificationRepository.save(notification);
+        List<Course> courses = courseRepository.findByStateOrState(StateCourse.NOT_YET, StateCourse.ONGOING);
+        for (Course course : courses) {
+            if (LocalDate.now().isAfter(course.getTimeEnd())) {
+                course.setState(StateCourse.END);
+                Notification notification = new Notification();
+                notification.setEventTime(course.getTimeStart().atStartOfDay());
+                notification.setName(String.format("Khóa học %s đã kết thúc", course.getName()));
+                notification.setState(StateNotification.UNREAD);
+                notification.setCategory(NotificationCategory.COURSE);
+                notification.setContent(String.format("Khóa học %s đã kết thúc lúc %s", course.getName(), course.getTimeEnd().toString()));
+                notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                notification.setEntityId(course.getId());
+                notification.setUser(course.getUser());
+                notificationRepository.save(notification);
 
-                    try {
-                        emailService.sendNotificationEmail(email,notification, user);
-                    } catch (MessagingException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (LocalDate.now().isAfter(course.getTimeStart()) && LocalDate.now().isBefore(course.getTimeEnd())) {
-                    course.setState(StateCourse.ONGOING);
+                try {
+                    emailService.sendNotificationEmail(course.getUser().getEmail(), notification, course.getUser());
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
                 }
+            } else if (LocalDate.now().isAfter(course.getTimeStart()) && LocalDate.now().isBefore(course.getTimeEnd())) {
+                course.setState(StateCourse.ONGOING);
             }
-            courseRepository.saveAll(courses);
-            log.info("Update Status Course End");
-        } else {
-            log.info("Please login to update course schedule task");
         }
-
+        courseRepository.saveAll(courses);
+        log.info("Update Status Course End");
     }
+
 }
+

@@ -37,7 +37,7 @@ public class Course extends BaseEntity{
     private RepeatTypeCourse repeatType;
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userID")
     @JsonBackReference
     private User user;

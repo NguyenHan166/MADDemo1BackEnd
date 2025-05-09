@@ -16,4 +16,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 
     List<Assignment> findByCourseOrderByTimeEndAsc(Course course);
     List<Assignment> findByUserAndState(User user, StateAssignment state);
+
+    List<Assignment> findByState(StateAssignment stateAssignment);
 }

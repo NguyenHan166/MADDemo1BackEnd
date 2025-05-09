@@ -23,7 +23,7 @@ public class ScheduleLearning extends BaseEntity{
     @Enumerated(EnumType.STRING)
     private StateLesson state;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userID")
     @JsonBackReference
     private User user;

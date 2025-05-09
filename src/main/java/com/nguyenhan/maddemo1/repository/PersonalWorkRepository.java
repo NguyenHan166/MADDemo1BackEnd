@@ -20,4 +20,6 @@ public interface PersonalWorkRepository extends JpaRepository<PersonalWork, Long
 
     Optional<PersonalWork> findByName(String name);
     List<PersonalWork> findByUserAndState(User user, StateAssignment state);
+
+    List<PersonalWork> findByState(StateAssignment stateAssignment);
 }

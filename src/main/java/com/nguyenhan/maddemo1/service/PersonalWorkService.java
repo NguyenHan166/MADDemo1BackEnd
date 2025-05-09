@@ -60,7 +60,7 @@ public class PersonalWorkService {
 
     @Transactional
     @PreAuthorize("@personalWorkSecurity.isOwner(#id)")
-    public PersonalWork updatePersonalWork(PersonalWorkUpdateDto request, Long id){
+    public PersonalWork updatePersonalWork(PersonalWorkUpdateDto request, Long id) {
         log.info("Id personalwork update: {}", id);
         PersonalWork personalWork = personalWorkRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("PersonalWork", "id", id.toString())
@@ -74,7 +74,7 @@ public class PersonalWorkService {
     }
 
     @PreAuthorize("@personalWorkSecurity.isOwner(#id)")
-    public boolean deletePersonalWork(Long id){
+    public boolean deletePersonalWork(Long id) {
         boolean isDeleted = false;
         PersonalWork personalWork = personalWorkRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("PersonalWork", "id", id.toString())
@@ -88,7 +88,7 @@ public class PersonalWorkService {
         return isDeleted;
     }
 
-    public List<PersonalWork> getPersonalWorksByUserId(){
+    public List<PersonalWork> getPersonalWorksByUserId() {
         User user = getCurrentUser();
 
         return personalWorkRepository.findByUserId(user.getId());
@@ -115,40 +115,33 @@ public class PersonalWorkService {
         return null; // hoặc throw exception nếu không tìm thấy
     }
 
-    @Scheduled(fixedRate = 1800000) // 30p
+    @Scheduled(fixedRate = 300000) // 30p
     public void updateStatePersonalWorkScheduleTask() {
         log.info("Update Status PersonalWork Start");
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-            List<PersonalWork> personalWorks = personalWorkRepository.findByUserAndState(user, StateAssignment.INCOMPLETE);
-            for (PersonalWork personalWork : personalWorks) {
-                if (LocalDateTime.now().isAfter(personalWork.getTimeEnd())) {
-                    personalWork.setState(StateAssignment.OVERDUE);
-                    Notification notification = new Notification();
-                    notification.setEventTime(personalWork.getTimeEnd());
-                    notification.setName(String.format("Công việc %s đã hết hạn", personalWork.getName()));
-                    notification.setState(StateNotification.UNREAD);
-                    notification.setCategory(NotificationCategory.PERSONAL_WORK);
-                    notification.setContent(String.format("Công việc %s đã hết hạn lúc %s", personalWork.getName(), personalWork.getTimeEnd().toString()));
-                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
-                    notification.setEntityId(personalWork.getId());
-                    notification.setUser(user);
-                    notificationRepository.save(notification);
+        List<PersonalWork> personalWorks = personalWorkRepository.findByState(StateAssignment.INCOMPLETE);
+        for (PersonalWork personalWork : personalWorks) {
+            if (LocalDateTime.now().isAfter(personalWork.getTimeEnd())) {
+                personalWork.setState(StateAssignment.OVERDUE);
+                Notification notification = new Notification();
+                notification.setEventTime(personalWork.getTimeEnd());
+                notification.setName(String.format("Công việc %s đã hết hạn", personalWork.getName()));
+                notification.setState(StateNotification.UNREAD);
+                notification.setCategory(NotificationCategory.PERSONAL_WORK);
+                notification.setContent(String.format("Công việc %s đã hết hạn lúc %s", personalWork.getName(), personalWork.getTimeEnd().toString()));
+                notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                notification.setEntityId(personalWork.getId());
+                notification.setUser(personalWork.getUser());
+                notificationRepository.save(notification);
 
-                    try {
-                        emailService.sendNotificationEmail(email,notification, user);
-                    } catch (MessagingException e) {
-                        throw new RuntimeException(e);
-                    }
+                try {
+                    emailService.sendNotificationEmail(personalWork.getUser().getEmail(), notification, personalWork.getUser());
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
                 }
             }
-            personalWorkRepository.saveAll(personalWorks);
-            log.info("Update Status Personal Work End");
-        } else {
-            log.info("Please login to update personal work schedule task");
         }
+        personalWorkRepository.saveAll(personalWorks);
+        log.info("Update Status Personal Work End");
     }
-
 
 }

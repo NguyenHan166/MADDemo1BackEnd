@@ -25,12 +25,12 @@ public class Assignment extends BaseEntity{
     private StateAssignment state;
     private String note;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "courseID")
     @JsonBackReference
     private Course course;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userID")
     @JsonBackReference
     private User user;

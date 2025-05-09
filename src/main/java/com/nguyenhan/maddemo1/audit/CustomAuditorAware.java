@@ -11,6 +11,10 @@ public class CustomAuditorAware implements AuditorAware<String> {
 
     @Override
     public Optional<String> getCurrentAuditor() {
-        return Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            return Optional.of("SYSTEM ADMIN");
+        }else{
+            return Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
+        }
     }
 }

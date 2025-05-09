@@ -32,7 +32,7 @@ public class PersonalWork extends BaseEntity{
     private StateAssignment state;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "userID")
     @JsonBackReference
     private User user;

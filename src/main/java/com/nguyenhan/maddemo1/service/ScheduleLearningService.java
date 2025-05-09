@@ -57,24 +57,24 @@ public class ScheduleLearningService {
 
     public ScheduleLearning fetchScheduleLearning(Long scheduleLearningID) {
         return scheduleLearningRepository.findById(scheduleLearningID).orElseThrow(
-                () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID" , scheduleLearningID.toString())
+                () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID", scheduleLearningID.toString())
         );
     }
 
     public ScheduleLearning createScheduleLearning(ScheduleLearningDto scheduleLearningDto) {
-        ScheduleLearning scheduleLearning = scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto,new ScheduleLearning());
+        ScheduleLearning scheduleLearning = scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, new ScheduleLearning());
         User user = userService.getAuthenticatedUser();
         scheduleLearning.setUser(user);
         Course course = new Course();
         if (scheduleLearningDto.getCourseID() != null) {
             course = courseRepository.findById(scheduleLearningDto.getCourseID()).orElseThrow(
-                    ()-> new ResourceNotFoundException("Course", "courseID" , scheduleLearningDto.getCourseID().toString())
+                    () -> new ResourceNotFoundException("Course", "courseID", scheduleLearningDto.getCourseID().toString())
             );
 
-            for (ScheduleLearning scheduleLearning1 : course.getScheduleLearnings()){
+            for (ScheduleLearning scheduleLearning1 : course.getScheduleLearnings()) {
                 if (scheduleLearning1.getTimeStart().equals(scheduleLearningDto.getTimeStart())
-                        || scheduleLearning1.getTimeEnd().equals(scheduleLearningDto.getTimeEnd())){
-                    throw new ResourceAlreadyExistsException("ScheduleLearning", "scheduleLearningTime" , scheduleLearningDto.getTimeStart().toString());
+                        || scheduleLearning1.getTimeEnd().equals(scheduleLearningDto.getTimeEnd())) {
+                    throw new ResourceAlreadyExistsException("ScheduleLearning", "scheduleLearningTime", scheduleLearningDto.getTimeStart().toString());
                 }
             }
 
@@ -88,29 +88,30 @@ public class ScheduleLearningService {
         return scheduleLearningRepository.findByCourseOrderByTimeStartAsc(course);
     }
 
-    public List<ScheduleLearning> getSchedulesBetweenTimes(Course course ,LocalDateTime startTime, LocalDateTime endTime) {
-        return scheduleLearningRepository.findByCourseAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(course ,startTime, endTime);
+    public List<ScheduleLearning> getSchedulesBetweenTimes(Course course, LocalDateTime startTime, LocalDateTime endTime) {
+        return scheduleLearningRepository.findByCourseAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(course, startTime, endTime);
     }
 
-    public boolean updateScheduleLearning(Long scheduleLearningID,ScheduleLearningDto scheduleLearningDto) {
+    public boolean updateScheduleLearning(Long scheduleLearningID, ScheduleLearningDto scheduleLearningDto) {
         boolean isUpdated = false;
         ScheduleLearning scheduleLearning = scheduleLearningRepository.findById(scheduleLearningID).orElseThrow(
-                () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID" , scheduleLearningID.toString())
+                () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID", scheduleLearningID.toString())
         );
 
         User user = userService.getAuthenticatedUser();
 
         boolean isContains = false;
 
-        for (ScheduleLearning s : user.getScheduleLearnings()){
-            if (s.getId().equals(scheduleLearningID)){
+        for (ScheduleLearning s : user.getScheduleLearnings()) {
+            if (s.getId().equals(scheduleLearningID)) {
                 isContains = true;
                 break;
             }
         }
 
-        if (!isContains) throw new ResourceNotFoundException("ScheduleLearning of User", "scheduleLearningID" , scheduleLearningID.toString());
-        scheduleLearning = scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto,scheduleLearning);
+        if (!isContains)
+            throw new ResourceNotFoundException("ScheduleLearning of User", "scheduleLearningID", scheduleLearningID.toString());
+        scheduleLearning = scheduleLearningMapper.mapToScheduleLearning(scheduleLearningDto, scheduleLearning);
         scheduleLearningRepository.save(scheduleLearning);
         isUpdated = true;
         return isUpdated;
@@ -118,7 +119,7 @@ public class ScheduleLearningService {
 
     public ScheduleLearning updateStateScheduleLearning(Long scheduleLearningID, StateLesson newState) {
         ScheduleLearning scheduleLearning = scheduleLearningRepository.findById(scheduleLearningID).orElseThrow(
-                () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID" , scheduleLearningID.toString())
+                () -> new ResourceNotFoundException("ScheduleLearning", "scheduleLearningID", scheduleLearningID.toString())
         );
         scheduleLearning.setState(newState);
         return scheduleLearningRepository.save(scheduleLearning);
@@ -140,39 +141,34 @@ public class ScheduleLearningService {
         return scheduleLearningRepository.findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(user, startTime, endTime);
     }
 
-    @Scheduled(fixedRate = 1800000) // 30p
+    @Scheduled(fixedRate = 300000) // 5p
     public void updateStateLessonScheduleTask() {
         log.info("Update Status Assignment Start");
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            String email = SecurityContextHolder.getContext().getAuthentication().getName();
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
-            List<ScheduleLearning> scheduleLearnings = scheduleLearningRepository.findByUserAndState(user, StateLesson.NOT_YET);
-            for (ScheduleLearning scheduleLearning : scheduleLearnings) {
-                if (LocalDateTime.now().isAfter(scheduleLearning.getTimeEnd())) {
-                    scheduleLearning.setState(StateLesson.ABSENT);
-                    Notification notification = new Notification();
-                    notification.setEventTime(scheduleLearning.getTimeStart());
-                    notification.setName(String.format("Buổi học %s chưa điểm danh", scheduleLearning.getName()));
-                    notification.setState(StateNotification.UNREAD);
-                    notification.setCategory(NotificationCategory.LESSON);
-                    notification.setContent(String.format("Buổi học %s đã kết thúc lúc %s và bạn chưa điểm danh",
-                            scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
-                    notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
-                    notification.setEntityId(scheduleLearning.getId());
-                    notification.setUser(user);
-                    notificationRepository.save(notification);
+        List<ScheduleLearning> scheduleLearnings = scheduleLearningRepository.findByState(StateLesson.NOT_YET);
+        for (ScheduleLearning scheduleLearning : scheduleLearnings) {
+            if (LocalDateTime.now().isAfter(scheduleLearning.getTimeEnd())) {
+                scheduleLearning.setState(StateLesson.ABSENT);
+                Notification notification = new Notification();
+                notification.setEventTime(scheduleLearning.getTimeStart());
+                notification.setName(String.format("Buổi học %s chưa điểm danh", scheduleLearning.getName()));
+                notification.setState(StateNotification.UNREAD);
+                notification.setCategory(NotificationCategory.LESSON);
+                notification.setContent(String.format("Buổi học %s đã kết thúc lúc %s và bạn chưa điểm danh",
+                        scheduleLearning.getName(), scheduleLearning.getTimeEnd().toString()));
+                notification.setTimeNoti(LocalDateTime.now().plusMinutes(1)); // Để tạm
+                notification.setEntityId(scheduleLearning.getId());
+                notification.setUser(scheduleLearning.getUser());
+                notificationRepository.save(notification);
 
-                    try {
-                        emailService.sendNotificationEmail(email,notification, user);
-                    } catch (MessagingException e) {
-                        throw new RuntimeException(e);
-                    }
+                try {
+                    emailService.sendNotificationEmail(scheduleLearning.getUser().getEmail(), notification, scheduleLearning.getUser());
+                } catch (MessagingException e) {
+                    throw new RuntimeException(e);
                 }
             }
-            scheduleLearningRepository.saveAll(scheduleLearnings);
-            log.info("Update Status ScheduleLearning End");
-        } else {
-            log.info("Please login to update Schedule Learning schedule task");
         }
+        scheduleLearningRepository.saveAll(scheduleLearnings);
+        log.info("Update Status ScheduleLearning End");
+
     }
 }
