@@ -85,15 +85,15 @@ public class PerformanceService {
 
             courseResponseDto.setReview_sche(calculateReview_sche(c));
             courseResponseDto.setTotalScheduleLearning(c.getScheduleLearnings().size());
-            courseResponseDto.setTotalScheduleLearningCurrent(calculateTotalScheduleLearningCurrent(c));
+//            courseResponseDto.setTotalScheduleLearningCurrent(calculateTotalScheduleLearningCurrent(c));
             courseResponseDto.setScheduleLearning_present(calculateScheduleLearningPresent(c));
-            courseResponseDto.setScheduleLearning_absent(calculateTotalScheduleLearningCurrent(c)-calculateScheduleLearningPresent(c));
+            courseResponseDto.setScheduleLearning_absent(calculateScheduleLearningAbsent(c));
             courseResponseDto.setTotalAssignment(c.getAssignments().size());
             courseResponseDto.setTotalAssignmentCurrent(calculateTotalAssignmentCurrent(c));
             courseResponseDto.setAssignment_overdue(calculateAssignment_overdue(c));
             courseResponseDto.setReview_ass(calculateReview_ass(courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
-            courseResponseDto.setPercent_review_all(calculatePercent_review_all(courseResponseDto.getScheduleLearning_present(), courseResponseDto.getTotalScheduleLearningCurrent(), courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
-            courseResponseDto.setText_review(evaluateTextReview(courseResponseDto.getScheduleLearning_present(), courseResponseDto.getTotalScheduleLearningCurrent(), courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
+            courseResponseDto.setPercent_review_all(calculatePercent_review_all(courseResponseDto.getScheduleLearning_present(), courseResponseDto.getScheduleLearning_absent()+ courseResponseDto.getScheduleLearning_present(), courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
+            courseResponseDto.setText_review(evaluateTextReview(courseResponseDto.getScheduleLearning_present(), courseResponseDto.getScheduleLearning_absent()+ courseResponseDto.getScheduleLearning_present(), courseResponseDto.getAssignment_overdue(), courseResponseDto.getTotalAssignmentCurrent()));
 
             courseResponseDtoList.add(courseResponseDto);
         }
@@ -161,21 +161,31 @@ public class PerformanceService {
         return count;
     }
 
-    public int calculateTotalScheduleLearningCurrent(Course course){
-        int count = 0;
-        List<ScheduleLearning> scheduleLearningList = course.getScheduleLearnings();
-        for(ScheduleLearning s : scheduleLearningList){
-            if(s.getTimeEnd().isBefore(LocalDateTime.now()))
-                count++;
-        }
-        return count;
-    }
+//    public int calculateTotalScheduleLearningCurrent(Course course){
+//        int count = 0;
+//        List<ScheduleLearning> scheduleLearningList = course.getScheduleLearnings();
+//        for(ScheduleLearning s : scheduleLearningList){
+//            if(s.getTimeEnd().isBefore(LocalDateTime.now()))
+//                count++;
+//        }
+//        return count;
+//    }
 
     public int calculateScheduleLearningPresent(Course course){
         int count = 0;
         List<ScheduleLearning> scheduleLearningList = course.getScheduleLearnings();
         for(ScheduleLearning s : scheduleLearningList){
             if(s.getState() == StateLesson.PRESENT)
+                count++;
+        }
+        return count;
+    }
+
+    public int calculateScheduleLearningAbsent(Course course){
+        int count = 0;
+        List<ScheduleLearning> scheduleLearningList = course.getScheduleLearnings();
+        for(ScheduleLearning s : scheduleLearningList){
+            if(s.getState() == StateLesson.ABSENT)
                 count++;
         }
         return count;
@@ -188,15 +198,15 @@ public class PerformanceService {
         int attendedLessons = 0;
 
         for (ScheduleLearning s : scheduleLearningList) {
-            if (s.getTimeStart().isBefore(LocalDateTime.now())) {
+            if (s.getState() == StateLesson.PRESENT) {
+                attendedLessons++;
                 totalLessons++;
-                if (s.getState() == StateLesson.PRESENT) {
-                    attendedLessons++;
-                }
+            } else if (s.getState() ==  StateLesson.ABSENT) {
+                totalLessons++;
             }
         }
 
-        if (totalLessons == 0) return null;
+        if (totalLessons == 0) return Review.GOOD;
 
         double ratio = (double) attendedLessons / totalLessons;
 

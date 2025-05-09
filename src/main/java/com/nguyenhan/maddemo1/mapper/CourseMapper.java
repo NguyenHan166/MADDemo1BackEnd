@@ -116,7 +116,7 @@ public class CourseMapper {
         CourseResponseDto courseResponseDto = new CourseResponseDto();
         courseResponseDto.setId(course.getId());
         courseResponseDto.setName(course.getName());
-        courseResponseDto.setNote(course.getNote());
+//        courseResponseDto.setNote(course.getNote());
         courseResponseDto.setTeacher(course.getTeacher());
         courseResponseDto.setTimeEnd(course.getTimeEnd());
         courseResponseDto.setTimeStart(course.getTimeStart());
