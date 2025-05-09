@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Slf4j
-@RequestMapping("api/performance")
+@RequestMapping("/api/performance")
 @RestController
 public class PerformanceController {
 

@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.nguyenhan.maddemo1.constants.NotificationCategory;
 import com.nguyenhan.maddemo1.constants.StateNotification;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
-@Data // Lombok để tự động tạo getter, setter
+@Getter@Setter@AllArgsConstructor@NoArgsConstructor // Lombok để tự động tạo getter, setter
 public class Notification {
 
     @Id

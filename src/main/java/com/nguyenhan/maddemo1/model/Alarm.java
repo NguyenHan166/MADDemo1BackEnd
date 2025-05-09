@@ -29,7 +29,7 @@ public class Alarm extends BaseEntity{
     private AlarmCategory category;
     private LocalDateTime timeAlarm;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @CollectionTable(name = "alarm_repeat_days", joinColumns = @JoinColumn(name = "alarm_id"))
     @Column(name = "repeat_day")

@@ -294,7 +294,7 @@ public class CourseController {
                     NotificationDto notificationDto = new NotificationDto();
                     notificationDto.setName(String.format("Buổi học %s chuẩn bị diễn ra", scheduleLearning.getName()));
                     notificationDto.setTimeNoti(scheduleLearning.getTimeStart().minusMinutes(30));
-                    notificationDto.setCategory(NotificationCategory.COURSE);
+                    notificationDto.setCategory(NotificationCategory.LESSON);
                     notificationDto.setContent(String.format("Buổi học %s chuẩn bị diễn ra vào lúc %s tại %s", scheduleLearning.getName(), scheduleLearning.getTimeStart(), scheduleLearning.getLearningAddresses()));
                     notificationDto.setEntityId(scheduleLearning.getId());
                     notificationDto.setEventTime(scheduleLearning.getTimeStart());

@@ -14,12 +14,14 @@ public class UsersMapper {
     private final ScheduleLearningMapper scheduleLearningMapper;
     private final CourseMapper courseMapper;
     private final AssignmentMapper assignmentMapper;
+    private final PersonalWorkMapper personalWorkMapper;
 
-    public UsersMapper(AlarmMapper alarmMapper, ScheduleLearningMapper scheduleLearningMapper, CourseMapper courseMapper, AssignmentMapper assignmentMapper) {
+    public UsersMapper(AlarmMapper alarmMapper, ScheduleLearningMapper scheduleLearningMapper, CourseMapper courseMapper, AssignmentMapper assignmentMapper, PersonalWorkMapper personalWorkMapper) {
         this.alarmMapper = alarmMapper;
         this.scheduleLearningMapper = scheduleLearningMapper;
         this.courseMapper = courseMapper;
         this.assignmentMapper = assignmentMapper;
+        this.personalWorkMapper = personalWorkMapper;
     }
 
     public UserDto mapToUserDto(User user, UserDto userDto) {
@@ -29,6 +31,7 @@ public class UsersMapper {
         List<AssignmentDto> assignmentDtoList = new ArrayList<>();
         List<ScheduleLearningDto> scheduleLearningDtoList = new ArrayList<>();
         List<CourseListOutputDto> courseListOutputDtoList = new ArrayList<>();
+        List<PersonalWorkDto> personalWorkDtoList = new ArrayList<>();
 
         user.getAlarms().forEach(alarm -> {
             alarmDtoList.add(alarmMapper.mapToAlarmDto(alarm, new AlarmDto()));
@@ -46,6 +49,10 @@ public class UsersMapper {
             scheduleLearningDtoList.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
         });
 
+        user.getPersonalWorks().forEach(personal -> {
+            personalWorkDtoList.add(personalWorkMapper.toPersonalWorkDto(personal));
+        });
+
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
         userDto.setAge(user.getAge());
@@ -57,6 +64,7 @@ public class UsersMapper {
         userDto.setAssignmentList(assignmentDtoList);
         userDto.setCourseList(courseListOutputDtoList);
         userDto.setScheduleLearningList(scheduleLearningDtoList);
+        userDto.setPersonalWorkList(personalWorkDtoList);
         return userDto;
     }
 
