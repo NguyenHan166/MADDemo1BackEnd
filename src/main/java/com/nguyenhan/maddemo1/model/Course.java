@@ -42,11 +42,11 @@ public class Course extends BaseEntity{
     @JsonBackReference
     private User user;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<ScheduleLearning> scheduleLearnings = new ArrayList<>();
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL ,fetch = FetchType.EAGER)
     @JsonManagedReference
     private List<Assignment> assignments = new ArrayList<>();
 }

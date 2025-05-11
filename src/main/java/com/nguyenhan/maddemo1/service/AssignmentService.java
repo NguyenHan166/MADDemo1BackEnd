@@ -9,11 +9,10 @@ import com.nguyenhan.maddemo1.mapper.AssignmentMapper;
 import com.nguyenhan.maddemo1.model.*;
 import com.nguyenhan.maddemo1.repository.*;
 import jakarta.mail.MessagingException;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,19 +91,22 @@ public class AssignmentService {
     @Transactional
     public boolean delete(Long id) {
         boolean isDeleted = false;
+        log.info("Nhận yêu cầu xoá assignment ID: {}", id);
         Assignment assignment = assignmentRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Assignment", "Id", id.toString())
         );
 
-        log.atInfo().log("Deleting Assignment");
-        assignmentRepository.deleteById(id);
+        log.info("Xoá assignment ID: {}", id);
+        assignmentRepository.deleteAssignmentById(id);
 
-        // xoá noti liên quan
-        notificationRepository.deleteByEntityIdAndCategory(assignment.getId(), NotificationCategory.ASSIGNMENT);
-        log.atInfo().log("Deleted Assignment successfully");
+        log.info("Xoá notification liên quan đến assignment ID: {}", id);
+        notificationRepository.deleteByEntityIdAndCategory(id, NotificationCategory.ASSIGNMENT);
+
+        log.info("Xoá assignment thành công ID: {}", id);
         isDeleted = true;
         return isDeleted;
     }
+
 
     @Scheduled(fixedRate = 300000) // 5p
     public void updateStateAssignmentScheduleTask() {

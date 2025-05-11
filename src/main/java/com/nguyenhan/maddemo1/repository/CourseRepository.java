@@ -4,6 +4,9 @@ import com.nguyenhan.maddemo1.constants.StateCourse;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -25,4 +28,8 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
             User user ,LocalDate startTime, LocalDate endTime);
 
     List<Course> findByStateOrState(StateCourse stateCourse, StateCourse stateCourse1);
+
+    @Modifying
+    @Query("DELETE FROM Course c WHERE c.id = :id ")
+    void deleteCourseById(@Param("id") Long id);
 }

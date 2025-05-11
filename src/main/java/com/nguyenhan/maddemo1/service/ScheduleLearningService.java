@@ -125,14 +125,16 @@ public class ScheduleLearningService {
         return scheduleLearningRepository.save(scheduleLearning);
     }
 
+    @Transactional
     public boolean deleteScheduleLearning(Long scheduleLearningID) {
+        log.atInfo().log("Delete lesson start");
         boolean isDeleted = false;
         ScheduleLearning scheduleLearning = fetchScheduleLearning(scheduleLearningID);
-        scheduleLearningRepository.deleteById(scheduleLearningID);
+        scheduleLearningRepository.deleteScheduleLearningById(scheduleLearningID);
 
         // xóa noti liên quan
         notificationRepository.deleteByEntityIdAndCategory(scheduleLearningID, NotificationCategory.LESSON);
-
+        log.atInfo().log("Delete lesson end");
         isDeleted = true;
         return isDeleted;
     }

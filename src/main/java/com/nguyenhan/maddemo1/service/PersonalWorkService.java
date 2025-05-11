@@ -73,6 +73,7 @@ public class PersonalWorkService {
         return personalWorkRepository.save(personalWork);
     }
 
+    @Transactional
     @PreAuthorize("@personalWorkSecurity.isOwner(#id)")
     public boolean deletePersonalWork(Long id) {
         boolean isDeleted = false;
@@ -81,7 +82,8 @@ public class PersonalWorkService {
         );
         log.info(personalWork.toString());
 //        personalWorkRepository.delete(personalWork);
-        personalWorkRepository.deleteById(id);
+        personalWorkRepository.deletePersonalWorkById(id);
+
         notificationRepository.deleteByEntityIdAndCategory(id, NotificationCategory.PERSONAL_WORK);
         log.info("PersonalWork with ID {} deleted successfully.", id);
         isDeleted = true;

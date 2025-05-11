@@ -10,18 +10,16 @@ import com.nguyenhan.maddemo1.mapper.CourseMapper;
 import com.nguyenhan.maddemo1.model.Course;
 import com.nguyenhan.maddemo1.model.Notification;
 import com.nguyenhan.maddemo1.model.User;
-import com.nguyenhan.maddemo1.repository.CourseRepository;
-import com.nguyenhan.maddemo1.repository.NotificationRepository;
-import com.nguyenhan.maddemo1.repository.UserRepository;
+import com.nguyenhan.maddemo1.repository.*;
 import jakarta.mail.MessagingException;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -39,14 +37,20 @@ public class CourseService {
     private final UserService userService;
     private final NotificationRepository notificationRepository;
     private final EmailService emailService;
+    private final ScheduleLearningRepository scheduleLearningRepository;
+    private final AssignmentRepository assignmentRepository;
 
-    public CourseService(CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper, UserService userService, NotificationRepository notificationRepository, EmailService emailService) {
+    public CourseService(CourseRepository courseRepository, UserRepository userRepository, CourseMapper courseMapper,
+                         UserService userService, NotificationRepository notificationRepository, EmailService emailService,
+                         ScheduleLearningRepository scheduleLearningRepository, AssignmentRepository assignmentRepository) {
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
         this.courseMapper = courseMapper;
         this.userService = userService;
         this.notificationRepository = notificationRepository;
         this.emailService = emailService;
+        this.assignmentRepository = assignmentRepository;
+        this.scheduleLearningRepository = scheduleLearningRepository;
     }
 
     public List<Course> listCourses() {
@@ -121,12 +125,13 @@ public class CourseService {
         return courseRepository.findByUserAndTimeStartGreaterThanEqualAndTimeEndLessThanEqual(user, startTime, endTime);
     }
 
+    @Transactional
     public boolean deleteCourse(Long id) {
         boolean isDelete = false;
         Course course = courseRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Course", "id", id.toString())
         );
-        courseRepository.deleteById(id);
+        log.atInfo().log("Delete course start");
 
         // Xóa noti liên quan
         notificationRepository.deleteByEntityIdAndCategory(id, NotificationCategory.COURSE);
@@ -135,6 +140,14 @@ public class CourseService {
                     notificationRepository.deleteByEntityIdAndCategory(lesson.getId(), NotificationCategory.LESSON);
                 }
         );
+
+        scheduleLearningRepository.deleteScheduleLearningByCourse(course.getId());
+        assignmentRepository.deleteAssignmentByCourse(course.getId());
+
+        courseRepository.deleteCourseById(id);
+        boolean isCourseDelete = courseRepository.existsById(id);
+        log.atInfo().log("Is delete: " + !isCourseDelete);
+        log.atInfo().log("Delete Course End");
 
         isDelete = true;
         return isDelete;
