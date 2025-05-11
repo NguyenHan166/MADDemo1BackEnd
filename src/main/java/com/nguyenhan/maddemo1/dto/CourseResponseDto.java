@@ -15,13 +15,13 @@ import java.util.List;
 public class CourseResponseDto {
     private Long id;
     private String name;
-    private String note;
+//    private String note;
     private String teacher;
     private LocalDate timeStart;
     private LocalDate timeEnd;
-    private int numberOfLesion;
+//    private int numberOfLesion;
     private String addressLearning;
-    private String repeatTime;
+//    private String repeatTime;
     @Enumerated(EnumType.STRING)
     private StateCourse state;
     @Enumerated(EnumType.STRING)
@@ -30,8 +30,9 @@ public class CourseResponseDto {
     private Review review_ass;
 
     private int percent_review_all;
+    private String text_review;
     private int totalScheduleLearning;
-    private int totalScheduleLearningCurrent;
+//    private int totalScheduleLearningCurrent;
     private int scheduleLearning_present;
     private int scheduleLearning_absent;
 

@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.mapper;
 
+import com.nguyenhan.maddemo1.constants.StateLesson;
 import com.nguyenhan.maddemo1.dto.*;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
 import com.nguyenhan.maddemo1.model.Course;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component // Biến CourseMapper thành Spring Bean
 public class CourseMapper {
@@ -100,18 +102,21 @@ public class CourseMapper {
 
     public CourseResponseDto mapToCourseResponseDto(Course course){
 
-        List<ScheduleLearningDto> scheduleLearningDtos = new ArrayList<>();
+        List<ScheduleLearningDto> scheduleLearningDtos = course.getScheduleLearnings().stream()
+                .filter(scheduleLearning -> StateLesson.ABSENT.equals(scheduleLearning.getState()))
+                .map(scheduleLearning -> scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()))
+                .collect(Collectors.toList());
 
-        course.getScheduleLearnings().forEach(
-                scheduleLearning -> {
-                    scheduleLearningDtos.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
-                }
-        );
+//        course.getScheduleLearnings().forEach(
+//                scheduleLearning -> {
+//                    scheduleLearningDtos.add(scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto()));
+//                }
+//        );
 
         CourseResponseDto courseResponseDto = new CourseResponseDto();
         courseResponseDto.setId(course.getId());
         courseResponseDto.setName(course.getName());
-        courseResponseDto.setNote(course.getNote());
+//        courseResponseDto.setNote(course.getNote());
         courseResponseDto.setTeacher(course.getTeacher());
         courseResponseDto.setTimeEnd(course.getTimeEnd());
         courseResponseDto.setTimeStart(course.getTimeStart());
