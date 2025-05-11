@@ -146,4 +146,9 @@ public class PersonalWorkService {
         log.info("Update Status Personal Work End");
     }
 
+    public PersonalWork findById(Long eventId) {
+        return personalWorkRepository.findById(eventId).orElseThrow(
+                () -> new ResourceNotFoundException("PersonalWork", "id", eventId.toString())
+        );
+    }
 }

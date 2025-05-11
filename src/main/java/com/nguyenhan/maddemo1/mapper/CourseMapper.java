@@ -39,7 +39,6 @@ public class CourseMapper {
         course.setTimeEnd(courseDto.getTimeEnd());
         course.setTimeStart(courseDto.getTimeStart());
         course.setAddressLearning(courseDto.getAddressLearning());
-        course.setState(courseDto.getState());
         course.setRepeatType(courseDto.getRepeatType());
         course.setListDay(courseDto.getListDay());
         course.setUser(user);
@@ -116,7 +115,7 @@ public class CourseMapper {
         CourseResponseDto courseResponseDto = new CourseResponseDto();
         courseResponseDto.setId(course.getId());
         courseResponseDto.setName(course.getName());
-//        courseResponseDto.setNote(course.getNote());
+        courseResponseDto.setNote(course.getNote());
         courseResponseDto.setTeacher(course.getTeacher());
         courseResponseDto.setTimeEnd(course.getTimeEnd());
         courseResponseDto.setTimeStart(course.getTimeStart());
@@ -125,6 +124,20 @@ public class CourseMapper {
         courseResponseDto.setScheduleLearningList(scheduleLearningDtos);
 //        courseResponseDto.setAssignmentDtoList(assignmentMapper.mapToAssignmentDtoList(course.getAssignments()));
         return courseResponseDto;
+    }
+
+    public CourseInputDto mapToCourseInputDto(Course course, CourseInputDto courseInputDto) {
+        courseInputDto.setName(course.getName());
+        courseInputDto.setNote(course.getNote());
+        courseInputDto.setCredits(course.getCredits());
+        courseInputDto.setTeacher(course.getTeacher());
+        courseInputDto.setTimeEnd(course.getTimeEnd());
+        courseInputDto.setTimeStart(course.getTimeStart());
+        courseInputDto.setAddressLearning(course.getAddressLearning());
+        courseInputDto.setState(course.getState());
+        courseInputDto.setRepeatType(course.getRepeatType());
+        courseInputDto.setListDay(course.getListDay());
+        return courseInputDto;
     }
 
 }

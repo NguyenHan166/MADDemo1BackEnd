@@ -57,6 +57,20 @@ public class NotificationController {
          return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
     }
 
+    @PutMapping("/update")
+    public ResponseEntity<Object> updateNotification(@RequestParam("id") Long id ,@RequestBody NotificationDto notificationDto) {
+        boolean isSuccess = notificationService.updateNotification(id, notificationDto);
+        if(isSuccess){
+            return ResponseEntity.status(ResponseConstants.STATUS_200).body(new NotificationDto());
+        }else{
+            return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
+                    "api/notifications/delete",
+                    ResponseConstants.STATUS_417,
+                    ResponseConstants.MESSAGE_417_UPDATE,
+                    LocalDateTime.now()
+            ));
+        }
+    }
 
     @DeleteMapping("/delete")
     public ResponseEntity<Object> deleteNotification(@RequestParam("id") Long id) {

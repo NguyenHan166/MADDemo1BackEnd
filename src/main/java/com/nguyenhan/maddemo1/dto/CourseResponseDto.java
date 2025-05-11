@@ -15,7 +15,7 @@ import java.util.List;
 public class CourseResponseDto {
     private Long id;
     private String name;
-//    private String note;
+    private String note;
     private String teacher;
     private LocalDate timeStart;
     private LocalDate timeEnd;

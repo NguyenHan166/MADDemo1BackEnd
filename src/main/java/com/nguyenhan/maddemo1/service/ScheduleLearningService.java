@@ -173,4 +173,10 @@ public class ScheduleLearningService {
         log.info("Update Status ScheduleLearning End");
 
     }
+
+    public ScheduleLearning findById(Long eventId) {
+        return scheduleLearningRepository.findById(eventId).orElseThrow(
+                () -> new ResourceNotFoundException("ScheduleLearning", "eventId", eventId.toString())
+        );
+    }
 }

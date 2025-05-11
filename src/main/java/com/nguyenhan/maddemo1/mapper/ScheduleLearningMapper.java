@@ -28,7 +28,7 @@ public class ScheduleLearningMapper {
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
         scheduleLearning.setUser(user);
         scheduleLearning.setLearningAddresses(scheduleLearningDto.getLearningAddresses());
-//        scheduleLearning.setNote(scheduleLearningDto.getNote());
+        scheduleLearning.setNote(scheduleLearningDto.getNote());
         scheduleLearning.setName(scheduleLearningDto.getName());
         scheduleLearning.setTeacher(scheduleLearningDto.getTeacher());
         scheduleLearning.setState(scheduleLearningDto.getState());
@@ -49,7 +49,7 @@ public class ScheduleLearningMapper {
         scheduleLearningDto.setId(scheduleLearning.getId());
         scheduleLearningDto.setName(scheduleLearning.getName());
         scheduleLearningDto.setLearningAddresses(scheduleLearning.getLearningAddresses());
-//        scheduleLearningDto.setNote(scheduleLearning.getNote());
+        scheduleLearningDto.setNote(scheduleLearning.getNote());
         scheduleLearningDto.setTeacher(scheduleLearning.getTeacher());
         scheduleLearningDto.setState(scheduleLearning.getState());
         scheduleLearningDto.setTimeEnd(scheduleLearning.getTimeEnd());

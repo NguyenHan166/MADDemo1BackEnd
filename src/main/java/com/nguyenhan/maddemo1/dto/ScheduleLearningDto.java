@@ -22,6 +22,6 @@ public class ScheduleLearningDto {
     private String learningAddresses;
     @Enumerated(EnumType.STRING)
     private StateLesson state;// notyet, vang,comat
-//    private String note;
+    private String note;
     private Long courseID;
 }
