@@ -1,5 +1,6 @@
 package com.nguyenhan.maddemo1.service;
 
+import com.nguyenhan.maddemo1.constants.AlarmCategory;
 import com.nguyenhan.maddemo1.dto.AlarmDto;
 import com.nguyenhan.maddemo1.exception.ResourceAlreadyExistsException;
 import com.nguyenhan.maddemo1.exception.ResourceNotFoundException;
@@ -8,11 +9,14 @@ import com.nguyenhan.maddemo1.mapper.AlarmMapper;
 import com.nguyenhan.maddemo1.model.Alarm;
 import com.nguyenhan.maddemo1.model.User;
 import com.nguyenhan.maddemo1.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class AlarmService {
 
@@ -54,16 +58,16 @@ public class AlarmService {
             throw new ResourceAlreadyExistsException("Alarms", "name", alarm.getName());
         }
 
-        if (alarm.getEntityId() != null){
-            if (alarm.getCategory().equals("LESSON")){
+        if (alarm.getEntityId() != null) {
+            if (alarm.getCategory().equals("LESSON")) {
                 scheduleLearningRepository.findById(alarm.getEntityId()).orElseThrow(
                         () -> new ResourceNotFoundException("ScheduleLearning", "Id", alarm.getEntityId().toString())
                 );
-            }else if (alarm.getCategory().equals("PERSONAL_WORK")){
+            } else if (alarm.getCategory().equals("PERSONAL_WORK")) {
                 personalWorkRepository.findById(alarm.getEntityId()).orElseThrow(
                         () -> new ResourceNotFoundException("PersonalWork", "Id", alarm.getEntityId().toString())
                 );
-            }else{
+            } else if (alarm.getCategory().equals("ASSIGNMENT")) {
                 assignmentRepository.findById(alarm.getEntityId()).orElseThrow(
                         () -> new ResourceNotFoundException("Assignment", "Id", alarm.getEntityId().toString())
                 );
@@ -73,34 +77,37 @@ public class AlarmService {
         return alarmRepository.save(alarm);
     }
 
-    public boolean updateAlarm(Long alarmId , AlarmDto alarmDto) {
+    @Transactional
+    public boolean updateAlarm(Long alarmId, AlarmDto alarmDto) {
         boolean isUpdated = false;
         Alarm alarm = alarmRepository.findById(alarmId).orElseThrow(
                 () -> new ResourceNotFoundException("Alarm", "Id", alarmId.toString())
         );
 
+        log.atInfo().log("Update Start");
 
         alarmMapper.mapToAlarm(alarmDto, alarm);
 
-        if (alarm.getEntityId() != null){
-            if (alarm.getCategory().equals("LESSON")){
+        if (alarm.getEntityId() != null && !alarm.getCategory().equals(AlarmCategory.GENERAL)) {
+            if (alarm.getCategory().equals(AlarmCategory.LESSON)) {
                 scheduleLearningRepository.findById(alarm.getEntityId()).orElseThrow(
                         () -> new ResourceNotFoundException("ScheduleLearning", "Id", alarm.getEntityId().toString())
                 );
-            }else if (alarm.getCategory().equals("PERSONAL_WORK")){
+            } else if (alarm.getCategory().equals(AlarmCategory.PERSONAL_WORK)) {
                 personalWorkRepository.findById(alarm.getEntityId()).orElseThrow(
                         () -> new ResourceNotFoundException("PersonalWork", "Id", alarm.getEntityId().toString())
                 );
-            }else if(alarm.getCategory().equals("ASSIGNMENT")) {
+            } else if (alarm.getCategory().equals(AlarmCategory.ASSIGNMENT)) {
                 assignmentRepository.findById(alarm.getEntityId()).orElseThrow(
                         () -> new ResourceNotFoundException("Assignment", "Id", alarm.getEntityId().toString())
                 );
-            }else{
+            } else {
                 throw new ServerErrorException("Something went wrong");
             }
         }
         alarmRepository.save(alarm);
         isUpdated = true;
+        log.atInfo().log("Update Alarm End");
         return isUpdated;
     }
 
