@@ -41,7 +41,7 @@ public class ScheduleLearningController {
     }
 
     @GetMapping("/fetch")
-    public ResponseEntity<ScheduleResponse> fetchScheduleLearningById(Long id) {
+    public ResponseEntity<ScheduleResponse> fetchScheduleLearningById(@RequestParam Long id) {
         ScheduleLearning scheduleLearning = scheduleLearningService.fetchScheduleLearning(id);
         ScheduleLearningDto dto = scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto());
         ScheduleResponse response = new ScheduleResponse();

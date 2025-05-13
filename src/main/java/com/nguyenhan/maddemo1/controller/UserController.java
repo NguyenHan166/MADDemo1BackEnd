@@ -109,57 +109,59 @@ public class UserController {
 
     @PutMapping("update/eventState")
     public ResponseEntity<Object> updateState(@RequestParam Long eventId, @RequestParam String type, @RequestParam String state) {
+        boolean isSuccess = false;
         if (type.equals(NotificationCategory.COURSE.toString())) {
             Course course = courseService.findById(eventId);
             course.setState(StateCourse.valueOf(state));
             CourseInputDto courseInputDto = courseMapper.mapToCourseInputDto(course, new CourseInputDto());
+            isSuccess = courseService.updateCourse(eventId, courseInputDto);
 
-            boolean isUpdated = courseService.updateCourse(eventId, courseInputDto);
+//            boolean isUpdated = courseService.updateCourse(eventId, courseInputDto);
 
-            if (isUpdated) {
-                CourseResponse courseResponse = new CourseResponse();
-                courseResponse.setCourse(courseMapper.mapToCourseDto(course, new CourseDetailsDto()));
-                return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseResponse);
-            } else {
-                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
-                        "api/course/update",
-                        ResponseConstants.STATUS_417,
-                        ResponseConstants.MESSAGE_417_UPDATE,
-                        LocalDateTime.now()
-                ));
-            }
+//            if (isUpdated) {
+//                CourseResponse courseResponse = new CourseResponse();
+//                courseResponse.setCourse(courseMapper.mapToCourseDto(course, new CourseDetailsDto()));
+//                return ResponseEntity.status(ResponseConstants.STATUS_200).body(courseResponse);
+//            } else {
+//                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
+//                        "api/course/update",
+//                        ResponseConstants.STATUS_417,
+//                        ResponseConstants.MESSAGE_417_UPDATE,
+//                        LocalDateTime.now()
+//                ));
+//            }
 
         } else if (type.equals(NotificationCategory.LESSON.toString())) {
             ScheduleLearning scheduleLearning = scheduleLearningService.findById(eventId);
             scheduleLearning.setState(StateLesson.valueOf(state));
             ScheduleLearningDto scheduleLearningDto = scheduleLearningMapper.mapToScheduleLearningDto(scheduleLearning, new ScheduleLearningDto());
-            boolean isSuccess = scheduleLearningService.updateScheduleLearning(eventId, scheduleLearningDto);
-            if (isSuccess) {
-                ScheduleResponse response = new ScheduleResponse();
-                response.setScheduleLearning(scheduleLearningDto);
-                return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
-            } else {
-                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ResponseDto(ResponseConstants.STATUS_417, ResponseConstants.MESSAGE_417_UPDATE));
-            }
+            isSuccess = scheduleLearningService.updateScheduleLearning(eventId, scheduleLearningDto);
+//            if (isSuccess) {
+//                ScheduleResponse response = new ScheduleResponse();
+//                response.setScheduleLearning(scheduleLearningDto);
+//                return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
+//            } else {
+//                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ResponseDto(ResponseConstants.STATUS_417, ResponseConstants.MESSAGE_417_UPDATE));
+//            }
         } else if(type.equals(NotificationCategory.ASSIGNMENT.toString())) {
             Assignment assignment = assignmentService.findById(eventId);
             assignment.setState(StateAssignment.valueOf(state));
             AssignmentDto assignmentDto = assignmentMapper.mapToAssignmentDto(assignment, new AssignmentDto());
 
-            boolean success = assignmentService.update(eventId, assignmentDto);
-            if (success) {
-                assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);
-                AssignmentResponse response = new AssignmentResponse();
-                response.setAssignment(assignmentDto);
-                return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
-            }else{
-                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
-                        "/api/users/update/assignment",
-                        ResponseConstants.STATUS_417,
-                        ResponseConstants.MESSAGE_417_UPDATE,
-                        LocalDateTime.now()
-                ));
-            }
+            isSuccess = assignmentService.update(eventId, assignmentDto);
+//            if (isSuccess) {
+//                assignmentMapper.mapToAssignmentDto(assignment, assignmentDto);
+//                AssignmentResponse response = new AssignmentResponse();
+//                response.setAssignment(assignmentDto);
+//                return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
+//            }else{
+//                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
+//                        "/api/users/update/assignment",
+//                        ResponseConstants.STATUS_417,
+//                        ResponseConstants.MESSAGE_417_UPDATE,
+//                        LocalDateTime.now()
+//                ));
+//            }
         } else if (type.equals(NotificationCategory.PERSONAL_WORK.toString())) {
             PersonalWork personalWork = personalWorkService.findById(eventId);
             personalWork.setState(StateAssignment.valueOf(state));
@@ -167,48 +169,53 @@ public class UserController {
             personalWorkMapper.updatePersonalWorkMapper(personalWork, personalWorkUpdateDto);
             PersonalWork personalWorkUpdated = personalWorkService.updatePersonalWork(personalWorkUpdateDto, eventId);
             PersonalWorkDto personalWorkDto = personalWorkMapper.toPersonalWorkDto(personalWorkUpdated);
-            PersonalWorkResponse response = new PersonalWorkResponse();
-            response.setPersonalWork(personalWorkDto);
-            return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
+//            PersonalWorkResponse response = new PersonalWorkResponse();
+//            response.setPersonalWork(personalWorkDto);
+            isSuccess = true;
+//            return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
         } else if (type.equals(NotificationCategory.ALARM.toString())){
             Alarm alarm = alarmService.findById(eventId);
             alarm.setState(AlarmState.valueOf(state));
             AlarmDto alarmDto = alarmMapper.mapToAlarmDto(alarm, new AlarmDto());
-            boolean isSuccess = alarmService.updateAlarm(eventId, alarmDto);
-            if (isSuccess) {
-                AlarmResponse response = new AlarmResponse();
-                response.setAlarm(alarmDto);
-                return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
-            }else{
-                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
-                        "api/users/update/alarm",
-                        ResponseConstants.STATUS_417,
-                        ResponseConstants.MESSAGE_417_UPDATE,
-                        LocalDateTime.now()
-                ));
-            }
+            isSuccess = alarmService.updateAlarm(eventId, alarmDto);
+//            if (isSuccess) {
+//                AlarmResponse response = new AlarmResponse();
+//                response.setAlarm(alarmDto);
+//                return ResponseEntity.status(ResponseConstants.STATUS_200).body(response);
+//            }else{
+//                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
+//                        "api/users/update/alarm",
+//                        ResponseConstants.STATUS_417,
+//                        ResponseConstants.MESSAGE_417_UPDATE,
+//                        LocalDateTime.now()
+//                ));
+//            }
         } else if (type.equals("NOTIFICATION")) {
             Notification notification = notificationService.getNotificationById(eventId);
             notification.setState(StateNotification.valueOf(state));
             notification.setReadTime(LocalDateTime.now());
             NotificationDto notificationDto = notificationMapper.mapToNotificationDto(notification, new NotificationDto());
-            boolean isSuccess = notificationService.updateNotification(eventId, notificationDto);
-            if(isSuccess){
-                return ResponseEntity.status(ResponseConstants.STATUS_200).body(notificationDto);
-            }else{
-                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
-                        "api/users/update/notification",
+            isSuccess = notificationService.updateNotification(eventId, notificationDto);
+//            if(isSuccess){
+//                return ResponseEntity.status(ResponseConstants.STATUS_200).body(notificationDto);
+//            }else{
+//                return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
+//                        "api/users/update/notification",
+//                        ResponseConstants.STATUS_417,
+//                        ResponseConstants.MESSAGE_417_UPDATE,
+//                        LocalDateTime.now()
+//                ));
+//            }
+        }
+
+        if (isSuccess){
+            return ResponseEntity.status(UsersConstants.STATUS_200).body(new ResponseDto(UsersConstants.STATUS_200, UsersConstants.MESSAGE_200));
+        }else{
+            return ResponseEntity.status(UsersConstants.STATUS_417).body(new ErrorResponseDto(
+                    "api/users/update/eventState",
                         ResponseConstants.STATUS_417,
                         ResponseConstants.MESSAGE_417_UPDATE,
                         LocalDateTime.now()
-                ));
-            }
-        } else {
-            return ResponseEntity.status(ResponseConstants.STATUS_417).body(new ErrorResponseDto(
-                    "api/users/update",
-                    ResponseConstants.STATUS_417,
-                    ResponseConstants.MESSAGE_417_UPDATE,
-                    LocalDateTime.now()
             ));
         }
 
